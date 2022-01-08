@@ -1,0 +1,17 @@
+{
+  "name": "api-gateway",
+  "version": "1.0.0",
+  "description": "API gateway for microservice system",
+  "main": "src/main.ts",
+  "scripts": {
+    "start": "node main.ts"
+  },
+  "keywords": [
+    "api-gateway"
+  ],
+  "author": "Akshit Sadana",
+  "license": "ISC",
+  "devDependencies": {
+    "typescript": "^4.5.4"
+  }
+}

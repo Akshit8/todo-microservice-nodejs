@@ -1,0 +1,47 @@
+{
+  "name": "todo-microservice-nodejs",
+  "version": "1.0.0",
+  "description": "implementing todo application with a microservice architecture",
+  "scripts": {
+    "gateway-dev": "ts-node --project api-gateway/tsconfig.json api-gateway/src/main.ts",
+    "auth-dev": "ts-node --project auth-service/tsconfig.json auth-service/src/main.ts",
+    "todo-dev": "ts-node --project todo-service/tsconfig.json todo-service/src/main.ts",
+    "dev": "nodemon",
+    "lint": "eslint --fix --ext .ts,.js .",
+    "format": "prettier --ignore-path .gitignore --write \"**/*.+(js|ts|json|yaml)\"",
+    "prepare": "husky install"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Akshit8/todo-microservice-nodejs.git"
+  },
+  "keywords": [
+    "nodejs",
+    "molecular",
+    "nats",
+    "typescript"
+  ],
+  "author": "Akshit Sadana",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Akshit8/todo-microservice-nodejs/issues"
+  },
+  "homepage": "https://github.com/Akshit8/todo-microservice-nodejs#readme",
+  "devDependencies": {
+    "@typescript-eslint/eslint-plugin": "^5.9.0",
+    "@typescript-eslint/parser": "^5.9.0",
+    "concurrently": "^7.0.0",
+    "eslint": "^7.32.0",
+    "eslint-config-prettier": "^8.3.0",
+    "eslint-config-standard": "^16.0.3",
+    "eslint-plugin-import": "^2.25.4",
+    "eslint-plugin-node": "^11.1.0",
+    "eslint-plugin-promise": "^5.2.0",
+    "lint-staged": "^12.1.7",
+    "nodemon": "^2.0.15",
+    "prettier": "^2.5.1",
+    "ts-node": "^10.4.0",
+    "typescript": "^4.5.4",
+    "husky": "^7.0.0"
+  }
+}
