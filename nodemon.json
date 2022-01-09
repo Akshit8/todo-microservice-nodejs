@@ -2,5 +2,5 @@
   "watch": ["api-gateway", "auth-service", "todo-service"],
   "ext": ".ts",
   "ignore": [],
-  "exec": "concurrently --kill-others \"npm:gateway-dev\" \"npm:auth-dev\" \"npm:todo-dev\""
+  "exec": "concurrently \"npm:gateway-dev\" \"npm:auth-dev\" \"npm:todo-dev\""
 }

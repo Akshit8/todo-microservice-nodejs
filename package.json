@@ -3,13 +3,14 @@
   "version": "1.0.0",
   "description": "implementing todo application with a microservice architecture",
   "scripts": {
-    "gateway-dev": "ts-node --project api-gateway/tsconfig.json api-gateway/src/main.ts",
-    "auth-dev": "ts-node --project auth-service/tsconfig.json auth-service/src/main.ts",
-    "todo-dev": "ts-node --project todo-service/tsconfig.json todo-service/src/main.ts",
+    "gateway-dev": "npm run dev --prefix ./api-gateway",
+    "auth-dev": "npm run dev --prefix ./auth-service",
+    "todo-dev": "npm run dev --prefix ./todo-service",
     "dev": "nodemon",
     "lint": "eslint --fix --ext .ts,.js .",
     "format": "prettier --ignore-path .gitignore --write \"**/*.+(js|ts|json|yaml)\"",
-    "prepare": "husky install"
+    "prepare": "husky install",
+    "dev:env": "docker-compose up -d"
   },
   "repository": {
     "type": "git",
@@ -37,11 +38,10 @@
     "eslint-plugin-import": "^2.25.4",
     "eslint-plugin-node": "^11.1.0",
     "eslint-plugin-promise": "^5.2.0",
+    "husky": "^7.0.0",
     "lint-staged": "^12.1.7",
     "nodemon": "^2.0.15",
     "prettier": "^2.5.1",
-    "ts-node": "^10.4.0",
-    "typescript": "^4.5.4",
-    "husky": "^7.0.0"
+    "typescript": "^4.5.4"
   }
 }
