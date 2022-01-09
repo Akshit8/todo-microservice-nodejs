@@ -1,7 +1,7 @@
 import { BrokerOptions } from "moleculer";
 
 const brokerConfig: BrokerOptions = {
-  namespace: "todo",
+  namespace: "todo-app",
   nodeID: "todo-node",
   transporter: {
     type: "NATS",

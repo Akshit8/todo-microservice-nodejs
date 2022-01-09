@@ -10,7 +10,7 @@
     "lint": "eslint --fix --ext .ts,.js .",
     "format": "prettier --ignore-path .gitignore --write \"**/*.+(js|ts|json|yaml)\"",
     "prepare": "husky install",
-    "dev:env": "docker-compose up -d"
+    "dev:env": "docker-compose -f docker-compose.dev.yaml up -d"
   },
   "repository": {
     "type": "git",

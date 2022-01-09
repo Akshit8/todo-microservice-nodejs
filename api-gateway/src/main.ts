@@ -20,8 +20,12 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 app.get("/test-auth", async (req, res) => {
-  const response = await gatewayBroker.call("auth.test");
-  res.send(response);
+  try {
+    const response = await gatewayBroker.call("auth.test");
+    res.send(response);
+  } catch (e) {
+    res.send(e);
+  }
 });
 
 app.get("/test-todo", async (req, res) => {
