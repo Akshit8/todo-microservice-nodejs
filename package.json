@@ -7,7 +7,8 @@
     "auth-dev": "npm run dev --prefix ./auth-service",
     "todo-dev": "npm run dev --prefix ./todo-service",
     "dev": "nodemon",
-    "lint": "eslint --fix --ext .ts,.js .",
+    "lint:ts": "eslint --fix --ext .ts .",
+    "lint:js": "eslint --fix --ext .js .",
     "format": "prettier --ignore-path .gitignore --write \"**/*.+(js|ts|json|yaml)\"",
     "prepare": "husky install",
     "dev:env": "docker-compose -f docker-compose.dev.yaml up -d"
