@@ -1,6 +1,6 @@
 import { BrokerOptions } from "moleculer";
 
-const brokerConfig: BrokerOptions = {
+export default {
   namespace: "todo-app",
   nodeID: "auth-node",
   transporter: {
@@ -9,6 +9,4 @@ const brokerConfig: BrokerOptions = {
       url: "nats://localhost:4222"
     }
   }
-};
-
-export default brokerConfig;
+} as BrokerOptions;
