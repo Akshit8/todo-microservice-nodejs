@@ -12,6 +12,7 @@
   },
   "plugins": ["@typescript-eslint"],
   "rules": {
+    "no-useless-constructor": "off",
     "import/order": [
       1,
       {

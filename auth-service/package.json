@@ -5,7 +5,7 @@
   "main": "src/main.ts",
   "scripts": {
     "compile": "tsc -p tsconfig.json",
-    "dev": "ts-node node_modules/moleculer/bin/moleculer-runner --config moleculer.config.ts src/*.MoleculerService.ts",
+    "dev": "ts-node node_modules/moleculer/bin/moleculer-runner --config moleculer.config.ts src/*.Service.ts",
     "typeorm": "node --require ts-node/register ./node_modules/typeorm/cli.js"
   },
   "keywords": [
