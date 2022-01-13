@@ -1,27 +1,46 @@
 import { Context, Service as MoleculerService } from "moleculer";
 import { Action, Service } from "moleculer-decorators";
-import { createConnection } from "typeorm";
+import { Connection, createConnection } from "typeorm";
 import { UserRepository } from "./repository";
+import { AuthToken, JWT } from "./utils";
 
 @Service({
   name: "auth"
 })
 class AuthService extends MoleculerService {
+  private dbConnection: Connection;
   private userRepo: UserRepository;
+  private authToken: AuthToken;
 
   async started() {
-    const connection = await createConnection();
+    this.dbConnection = await createConnection();
 
-    this.userRepo = connection.getCustomRepository(UserRepository);
+    this.userRepo = this.dbConnection.getCustomRepository(UserRepository);
+
+    this.authToken = new JWT("asd", "asd");
   }
 
-  async stoped() {}
+  async stoped() {
+    this.dbConnection.close();
+  }
 
   @Action()
-  signUp({ params }: Context<{ username: string; email: string; password: string }>) {}
+  async signUp({
+    params
+  }: Context<{ username: string; email: string; password: string }>) {
+    const user = await this.userRepo.saveNewUser(
+      params.username,
+      params.email,
+      params.password
+    );
+    return user;
+  }
 
   @Action()
-  login(ctx: Context) {}
+  async login({ params }: Context<{ username: string; password: string }>) {
+    const user = await this.userRepo.getUserByName(params.username);
+    return user;
+  }
 
   @Action()
   getUser(ctx: Context) {}
