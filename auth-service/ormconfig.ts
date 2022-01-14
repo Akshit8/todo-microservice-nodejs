@@ -7,8 +7,8 @@ export default {
   username: process.env.DB_USER || "admin",
   password: process.env.DB_PASSWORD || "admin",
   database: process.env.DB_NAME || "auth-service",
-  entities: ["src/entity/*.ts"],
-  migrations: ["db/migrations/*.ts"],
+  entities: ["src/entity/*.ts", "src/entity/*.js"],
+  migrations: ["db/migrations/*.ts", "db/migrations/*.js"],
   cli: {
     migrationsDir: "db/migrations"
   },

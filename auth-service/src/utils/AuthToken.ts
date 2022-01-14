@@ -1,4 +1,8 @@
-export interface tokenPayload {}
+import { sign, verify } from "jsonwebtoken";
+
+export interface tokenPayload {
+  id: number;
+}
 
 export interface AuthToken {
   signToken(payload: tokenPayload): Promise<string>;
@@ -15,10 +19,35 @@ export class JWT implements AuthToken {
   }
 
   async signToken(payload: tokenPayload): Promise<string> {
-    return "";
+    return new Promise<string>((resolve, reject) => {
+      sign(
+        payload,
+        this.secret,
+        { expiresIn: this.duration },
+        (err: Error | null, token: string | undefined): void => {
+          if (err) {
+            reject(err);
+            return;
+          }
+          if (!token) {
+            reject(new Error("token not returned"));
+            return;
+          }
+          resolve(token);
+        }
+      );
+    });
   }
 
   async verifyToken(token: string): Promise<tokenPayload> {
-    return {};
+    return new Promise<tokenPayload>((resolve, reject) => {
+      verify(token, this.secret, (err: any, payload: any) => {
+        if (err) {
+          reject(err);
+          return;
+        }
+        resolve(payload);
+      });
+    });
   }
 }

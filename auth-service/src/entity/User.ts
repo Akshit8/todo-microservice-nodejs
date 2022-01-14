@@ -1,25 +1,23 @@
 import {
-  BeforeInsert,
   Column,
   CreateDateColumn,
   Entity,
   PrimaryGeneratedColumn,
   UpdateDateColumn
 } from "typeorm";
-import { BcryptHasher } from "../utils";
 
 @Entity()
 export class User {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column()
+  @Column({ unique: true, nullable: false })
   username: string;
 
-  @Column()
+  @Column({ unique: true, nullable: false })
   email: string;
 
-  @Column()
+  @Column({ nullable: false })
   password: string;
 
   @CreateDateColumn()
@@ -28,15 +26,8 @@ export class User {
   @UpdateDateColumn()
   updatedAt: Date;
 
-  constructor(username: string, email: string) {
-    this.username = username;
-    this.email = email;
-  }
-
-  @BeforeInsert()
-  async hashPassword() {
-    const passwordHasher = new BcryptHasher();
-
-    this.password = await passwordHasher.hashPassword(this.password);
+  constructor(username?: string, email?: string) {
+    this.username = username!;
+    this.email = email!;
   }
 }
