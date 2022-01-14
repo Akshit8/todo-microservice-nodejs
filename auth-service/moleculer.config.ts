@@ -1,5 +1,4 @@
 import { BrokerOptions } from "moleculer";
-import { brokerErrorHandler } from "./src/errors";
 
 export default {
   namespace: "todo-app",
@@ -13,6 +12,5 @@ export default {
   validator: true,
   logger: {
     type: "Console"
-  },
-  errorHandler: brokerErrorHandler
+  }
 } as BrokerOptions;

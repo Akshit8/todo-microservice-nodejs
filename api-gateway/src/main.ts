@@ -21,9 +21,11 @@ app.use(express.urlencoded({ extended: true }));
 
 app.get("/test-auth", async (req, res) => {
   try {
-    const response = await gatewayBroker.call("auth.test");
+    const response = await gatewayBroker.call("auth.getUser", { id: 6 });
+    console.log("resp", response);
     res.send(response);
   } catch (e) {
+    console.log("err", e);
     res.send(e);
   }
 });

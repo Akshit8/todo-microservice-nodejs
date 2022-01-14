@@ -1,6 +1,6 @@
-import { Errors } from "moleculer";
-import { EntityRepository, Repository } from "typeorm";
+import { EntityRepository, QueryFailedError, Repository } from "typeorm";
 import { User } from "../entity";
+import { UserNotFoundError } from "../errors";
 import { BcryptHasher, PasswordHasher } from "../utils";
 
 @EntityRepository(User)
@@ -12,7 +12,15 @@ export class UserRepository extends Repository<User> {
     const user = new User(username, email);
     user.password = await this.passwordHasher.hashPassword(password);
 
-    const insertResult = await this.insert(user);
+    let insertResult;
+    try {
+      insertResult = await this.insert(user);
+    } catch (e) {
+      if (e instanceof QueryFailedError) {
+        throw new Error("bad request");
+      }
+      throw e;
+    }
 
     const { id, createdAt, updatedAt } = insertResult.generatedMaps[0] as User;
     user.id = id;
@@ -25,8 +33,7 @@ export class UserRepository extends Repository<User> {
   private async getUser(query: { [key: string]: string | number }): Promise<User> {
     const user = await this.findOne(query);
     if (!user) {
-      // throw new Error("user not found");
-      throw new Errors.ValidationError("user not found");
+      throw new UserNotFoundError();
     }
 
     return user;

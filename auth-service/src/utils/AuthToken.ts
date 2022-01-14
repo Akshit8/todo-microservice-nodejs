@@ -1,4 +1,5 @@
-import { sign, verify } from "jsonwebtoken";
+import { JsonWebTokenError, sign, TokenExpiredError, verify } from "jsonwebtoken";
+import { JWTError } from "../errors";
 
 export interface tokenPayload {
   id: number;
@@ -26,7 +27,8 @@ export class JWT implements AuthToken {
         { expiresIn: this.duration },
         (err: Error | null, token: string | undefined): void => {
           if (err) {
-            reject(err);
+            const e = new JWTError("error signing token", err.message);
+            reject(e);
             return;
           }
           if (!token) {
@@ -43,7 +45,15 @@ export class JWT implements AuthToken {
     return new Promise<tokenPayload>((resolve, reject) => {
       verify(token, this.secret, (err: any, payload: any) => {
         if (err) {
-          reject(err);
+          let e;
+          if (err instanceof TokenExpiredError) {
+            e = new JWTError("token expired error", err.message);
+          } else if (err instanceof JsonWebTokenError) {
+            e = new JWTError("jwt library internal error", err.message);
+          } else {
+            e = new JWTError("unknown error occured on token verification");
+          }
+          reject(e);
           return;
         }
         resolve(payload);

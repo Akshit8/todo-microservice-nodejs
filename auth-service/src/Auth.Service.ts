@@ -1,11 +1,23 @@
 import { Context, LoggerInstance, Service as MoleculerService } from "moleculer";
-import { Action, Service } from "moleculer-decorators";
+import { Action, Method, Service } from "moleculer-decorators";
 import { Connection, createConnection } from "typeorm";
+import { User } from "./entity";
 import { UserRepository } from "./repository";
 import { AuthToken, JWT } from "./utils";
 
 @Service({
-  name: "auth"
+  name: "auth",
+  hooks: {
+    before: {
+      getUser: "authMiddleware"
+    },
+    error: {
+      "*": "errorHandler"
+    },
+    after: {
+      "*": "cleanResponse"
+    }
+  }
 })
 class AuthService extends MoleculerService {
   private dbConnection: Connection;
@@ -29,6 +41,32 @@ class AuthService extends MoleculerService {
     if (this.dbConnection) {
       await this.dbConnection.close();
     }
+  }
+
+  @Method
+  async authMiddleware(ctx: Context<{ token: string; id: number }>) {
+    const tokenPayload = await this.authToken.verifyToken(ctx.params.token);
+    ctx.params.id = Number(tokenPayload.id);
+  }
+
+  @Method
+  cleanResponse(ctx: Context, res: any) {
+    if (res instanceof User) {
+      res = {
+        id: res.id,
+        username: res.username,
+        email: res.email
+      };
+    }
+
+    return res;
+  }
+
+  @Method
+  errorHandler(ctx: Context, err: Error) {
+    ctx.service?.logger.error(err);
+    // throw err;
+    throw new Error("asd");
   }
 
   @Action({
@@ -66,7 +104,7 @@ class AuthService extends MoleculerService {
 
   @Action({
     params: {
-      id: { type: "number", integer: true, positive: true }
+      id: { type: "number", integer: true, positive: true, nullable: true }
     }
   })
   async getUser({ params }: Context<{ id: number }>) {
