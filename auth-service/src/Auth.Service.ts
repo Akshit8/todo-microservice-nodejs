@@ -1,9 +1,35 @@
-import { Context, LoggerInstance, Service as MoleculerService } from "moleculer";
+import {
+  Context,
+  Errors,
+  LoggerInstance,
+  Service as MoleculerService
+} from "moleculer";
 import { Action, Method, Service } from "moleculer-decorators";
 import { Connection, createConnection } from "typeorm";
 import { User } from "./entity";
+import {
+  BaseInternalError,
+  BaseServiceError,
+  InternalServiceError,
+  ValidationError
+} from "./errors";
 import { UserRepository } from "./repository";
 import { AuthToken, JWT } from "./utils";
+
+interface ServiceError {
+  error_code: string;
+  error_type: string;
+  error_message: string;
+}
+
+type ServiceData = string | number | Object;
+
+interface ServiceResponse {
+  success: boolean;
+  http_status_code: number;
+  error?: ServiceError;
+  data?: ServiceData;
+}
 
 @Service({
   name: "auth",
@@ -15,7 +41,7 @@ import { AuthToken, JWT } from "./utils";
       "*": "errorHandler"
     },
     after: {
-      "*": "cleanResponse"
+      "*": ["cleanResponse", "renderServiceResponse"]
     }
   }
 })
@@ -63,27 +89,73 @@ class AuthService extends MoleculerService {
   }
 
   @Method
-  errorHandler(ctx: Context, err: Error) {
-    ctx.service?.logger.error(err);
-    // throw err;
-    throw new Error("asd");
+  renderServiceResponse(ctx: Context, res: any): ServiceResponse {
+    return {
+      success: true,
+      http_status_code: 200,
+      data: { res }
+    };
+  }
+
+  @Method
+  errorHandler(
+    ctx: Context,
+    err: Error | BaseInternalError | BaseServiceError | Errors.MoleculerError
+  ) {
+    if (err instanceof BaseInternalError) {
+      this.logger.error(err);
+      err = new InternalServiceError();
+    }
+
+    if (err instanceof Errors.ValidationError) {
+      err = new ValidationError();
+    }
+
+    if (err instanceof Errors.MoleculerError) {
+      // since rpc call, throw err
+      throw err;
+    }
+    this.renderServiceError(ctx, err as BaseServiceError);
+  }
+
+  @Method
+  renderServiceError(ctx: Context, err: BaseServiceError): ServiceResponse {
+    return {
+      success: false,
+      http_status_code: err.http_status_code,
+      error: {
+        error_code: err.internal_status_code,
+        error_type: err.type,
+        error_message: err.message
+      }
+    };
   }
 
   @Action({
     params: {
       username: { type: "string" },
       email: { type: "email" },
-      password: { type: "string", min: 6 }
+      password: { type: "string", min: 6 },
+      confirmPassword: { type: "string", min: 6 }
     }
   })
   async signUp({
     params
-  }: Context<{ username: string; email: string; password: string }>) {
+  }: Context<{
+    username: string;
+    email: string;
+    password: string;
+    confirmPassword: string;
+  }>) {
+    if (params.password !== params.confirmPassword) {
+      throw new ValidationError("confirmation password invalid");
+    }
     const user = await this.userRepo.saveNewUser(
       params.username,
       params.email,
       params.password
     );
+    // TODO: fix responses
     return user;
   }
 

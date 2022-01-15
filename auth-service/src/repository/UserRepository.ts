@@ -1,6 +1,6 @@
 import { EntityRepository, QueryFailedError, Repository } from "typeorm";
 import { User } from "../entity";
-import { UserNotFoundError } from "../errors";
+import { BadRequestError, ORMError, ResourceNotFoundError } from "../errors";
 import { BcryptHasher, PasswordHasher } from "../utils";
 
 @EntityRepository(User)
@@ -16,10 +16,13 @@ export class UserRepository extends Repository<User> {
     try {
       insertResult = await this.insert(user);
     } catch (e) {
+      // wrap custom error
       if (e instanceof QueryFailedError) {
-        throw new Error("bad request");
+        throw new BadRequestError("username or email already registered");
+      } else if (e instanceof Error) {
+        throw new ORMError(e.message);
       }
-      throw e;
+      throw new ORMError("unexpected orm error");
     }
 
     const { id, createdAt, updatedAt } = insertResult.generatedMaps[0] as User;
@@ -33,7 +36,8 @@ export class UserRepository extends Repository<User> {
   private async getUser(query: { [key: string]: string | number }): Promise<User> {
     const user = await this.findOne(query);
     if (!user) {
-      throw new UserNotFoundError();
+      // wrap around custom error
+      throw new ResourceNotFoundError("user not found");
     }
 
     return user;
