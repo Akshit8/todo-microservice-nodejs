@@ -7,12 +7,7 @@ import {
 import { Action, Method, Service } from "moleculer-decorators";
 import { Connection, createConnection } from "typeorm";
 import { User } from "./entity";
-import {
-  BaseInternalError,
-  BaseServiceError,
-  InternalServiceError,
-  ValidationError
-} from "./errors";
+import { BaseInternalError, BaseServiceError, ValidationError } from "./errors";
 import { UserRepository } from "./repository";
 import { AuthToken, JWT } from "./utils";
 
@@ -29,6 +24,12 @@ interface ServiceResponse {
   http_status_code: number;
   error?: ServiceError;
   data?: ServiceData;
+}
+
+interface ActionResponse {
+  http_status_code: number;
+  user?: User;
+  token?: string;
 }
 
 @Service({
@@ -54,11 +55,8 @@ class AuthService extends MoleculerService {
   // called always when broker is started
   async started() {
     this.dbConnection = await createConnection();
-
     this.userRepo = this.dbConnection.getCustomRepository(UserRepository);
-
     this.authToken = new JWT("asdz", "1h");
-
     this.logger = this.broker.logger;
   }
 
@@ -70,30 +68,26 @@ class AuthService extends MoleculerService {
   }
 
   @Method
-  async authMiddleware(ctx: Context<{ token: string; id: number }>) {
+  async authMiddleware(ctx: Context<{ token: string; id: number }>): Promise<void> {
     const tokenPayload = await this.authToken.verifyToken(ctx.params.token);
     ctx.params.id = Number(tokenPayload.id);
   }
 
   @Method
-  cleanResponse(ctx: Context, res: any) {
-    if (res instanceof User) {
-      res = {
-        id: res.id,
-        username: res.username,
-        email: res.email
-      };
+  cleanResponse(ctx: Context, res: ActionResponse): ActionResponse {
+    if (res.user) {
+      // @ts-ignore
+      delete res.user.password;
     }
 
     return res;
   }
 
   @Method
-  renderServiceResponse(ctx: Context, res: any): ServiceResponse {
+  renderServiceResponse(ctx: Context, res: ActionResponse): ServiceResponse {
     return {
       success: true,
-      http_status_code: 200,
-      data: { res }
+      ...res
     };
   }
 
@@ -101,21 +95,22 @@ class AuthService extends MoleculerService {
   errorHandler(
     ctx: Context,
     err: Error | BaseInternalError | BaseServiceError | Errors.MoleculerError
-  ) {
-    if (err instanceof BaseInternalError) {
-      this.logger.error(err);
-      err = new InternalServiceError();
-    }
-
+  ): ServiceResponse {
     if (err instanceof Errors.ValidationError) {
       err = new ValidationError();
     }
 
-    if (err instanceof Errors.MoleculerError) {
+    if (err instanceof BaseInternalError || err instanceof Errors.MoleculerError) {
+      this.logger.error(err);
+      if (err instanceof BaseInternalError) {
+        err = new Errors.MoleculerServerError(err.message);
+      }
+
       // since rpc call, throw err
       throw err;
     }
-    this.renderServiceError(ctx, err as BaseServiceError);
+
+    return this.renderServiceError(ctx, err as BaseServiceError);
   }
 
   @Method
@@ -146,7 +141,7 @@ class AuthService extends MoleculerService {
     email: string;
     password: string;
     confirmPassword: string;
-  }>) {
+  }>): Promise<ActionResponse> {
     if (params.password !== params.confirmPassword) {
       throw new ValidationError("confirmation password invalid");
     }
@@ -155,8 +150,7 @@ class AuthService extends MoleculerService {
       params.email,
       params.password
     );
-    // TODO: fix responses
-    return user;
+    return { http_status_code: 201, user };
   }
 
   @Action({
@@ -165,13 +159,15 @@ class AuthService extends MoleculerService {
       password: { type: "string", min: 6 }
     }
   })
-  async login({ params }: Context<{ username: string; password: string }>) {
+  async login({
+    params
+  }: Context<{ username: string; password: string }>): Promise<ActionResponse> {
     const user = await this.userRepo.loginUser(params.username, params.password);
     if (!user) {
       throw new Error("invalid login");
     }
     const token = await this.authToken.signToken({ id: user.id });
-    return token;
+    return { http_status_code: 200, token };
   }
 
   @Action({
@@ -179,9 +175,9 @@ class AuthService extends MoleculerService {
       id: { type: "number", integer: true, positive: true, nullable: true }
     }
   })
-  async getUser({ params }: Context<{ id: number }>) {
+  async getUser({ params }: Context<{ id: number }>): Promise<ActionResponse> {
     const user = await this.userRepo.getUserById(params.id);
-    return user;
+    return { http_status_code: 200, user };
   }
 }
 

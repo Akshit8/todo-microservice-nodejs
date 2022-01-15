@@ -9,12 +9,12 @@ export enum ServiceErrorTypes {
 }
 
 export enum ServiceErrorCode {
-  BAD_REQUEST_ERROR = "ES01",
-  RESOURCE_NOT_FOUND_ERROR = "ES02",
-  VALIDATION_ERROR = "ES03",
-  AUTHENTICATION_ERROR = "ES04",
-  AUTHORIZATION_ERROR = "ES05",
-  SERVICE_ERROR = "ES06"
+  BAD_REQUEST_ERROR = "E001",
+  RESOURCE_NOT_FOUND_ERROR = "E002",
+  VALIDATION_ERROR = "E003",
+  AUTHENTICATION_ERROR = "E004",
+  AUTHORIZATION_ERROR = "E005",
+  SERVICE_ERROR = "E006"
 }
 
 export class BaseServiceError extends Error {
@@ -77,7 +77,7 @@ export class ValidationError extends BaseServiceError {
   constructor(message?: string) {
     super(
       422,
-      ServiceErrorCode.SERVICE_ERROR,
+      ServiceErrorCode.VALIDATION_ERROR,
       ServiceErrorTypes.VALIDATION_ERROR,
       message || "invalid data recieved"
     );
