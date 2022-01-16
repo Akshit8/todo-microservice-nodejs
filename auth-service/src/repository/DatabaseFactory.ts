@@ -1,12 +1,6 @@
-// import faker from "faker";
 import { Repository } from "typeorm";
 
-// eslint-disable-next-line no-unused-vars
-interface Entity<T> {
-  getModel(): T;
-}
-
-export class DatabaseFactory<T, K extends Repository<T>> {
+export abstract class DatabaseFactory<T, K extends Repository<T>> {
   models: T[];
   repo: K;
 
@@ -14,7 +8,13 @@ export class DatabaseFactory<T, K extends Repository<T>> {
     this.repo = repo;
   }
 
+  abstract getModel(): Promise<T>;
+
   async addModels(n: number) {
+    for (let i = 0; i < n; i++) {
+      const model = await this.getModel();
+      this.models.push(model);
+    }
     await this.repo.save(this.models);
   }
 
