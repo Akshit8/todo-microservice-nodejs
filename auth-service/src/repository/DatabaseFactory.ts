@@ -1,7 +1,7 @@
 import { Repository } from "typeorm";
 
 export abstract class DatabaseFactory<T, K extends Repository<T>> {
-  models: T[];
+  models: T[] = [];
   repo: K;
 
   constructor(repo: K) {

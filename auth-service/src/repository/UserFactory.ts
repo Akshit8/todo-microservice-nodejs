@@ -1,4 +1,4 @@
-import faker from "faker";
+import faker from "@faker-js/faker";
 import { DatabaseFactory } from "./DatabaseFactory";
 import { User } from "../entity";
 import { BcryptHasher, PasswordHasher } from "../utils";
