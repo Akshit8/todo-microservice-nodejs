@@ -96,10 +96,6 @@ class AuthService extends MoleculerService {
     ctx: Context,
     err: Error | BaseInternalError | BaseServiceError | Errors.MoleculerError
   ): ServiceResponse {
-    if (err instanceof Errors.ValidationError) {
-      err = new ValidationError();
-    }
-
     if (err instanceof BaseInternalError || err instanceof Errors.MoleculerError) {
       this.logger.error(err);
       if (err instanceof BaseInternalError) {
@@ -170,11 +166,7 @@ class AuthService extends MoleculerService {
     return { http_status_code: 200, token };
   }
 
-  @Action({
-    params: {
-      id: { type: "number", integer: true, positive: true, nullable: true }
-    }
-  })
+  @Action()
   async getUser({ params }: Context<{ id: number }>): Promise<ActionResponse> {
     const user = await this.userRepo.getUserById(params.id);
     return { http_status_code: 200, user };

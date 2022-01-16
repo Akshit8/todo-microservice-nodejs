@@ -30,4 +30,8 @@ export class User {
     this.username = username!;
     this.email = email!;
   }
+
+  getModel(username: string, email: string): User {
+    return new User(username, email);
+  }
 }
