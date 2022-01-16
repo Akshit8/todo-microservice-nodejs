@@ -1,4 +1,4 @@
-import { EntityRepository, QueryFailedError, Repository } from "typeorm";
+import { EntityRepository, QueryFailedError, Repository, TypeORMError } from "typeorm";
 import { User } from "../entity";
 import { BadRequestError, ORMError, ResourceNotFoundError } from "../errors";
 import { BcryptHasher, PasswordHasher } from "../utils";
@@ -34,7 +34,16 @@ export class UserRepository extends Repository<User> {
   }
 
   private async getUser(query: { [key: string]: string | number }): Promise<User> {
-    const user = await this.findOne(query);
+    let user: User | undefined;
+    try {
+      user = await this.findOne(query);
+    } catch (err) {
+      if (err instanceof TypeORMError) {
+        throw new ORMError(err.message);
+      }
+      throw new ORMError("unknown error occured while getting user");
+    }
+
     if (!user) {
       // wrap around custom error
       throw new ResourceNotFoundError("user not found");

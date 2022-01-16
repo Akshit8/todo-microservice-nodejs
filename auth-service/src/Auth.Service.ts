@@ -56,7 +56,7 @@ class AuthService extends MoleculerService {
   async started() {
     this.dbConnection = await createConnection();
     this.userRepo = this.dbConnection.getCustomRepository(UserRepository);
-    this.authToken = new JWT("asdz", "1h");
+    this.authToken = new JWT("secret", "24h");
     this.logger = this.broker.logger;
   }
 

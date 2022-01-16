@@ -8,6 +8,10 @@ const brokerConfig: BrokerOptions = {
     options: {
       url: "nats://localhost:4222"
     }
+  },
+  validator: true,
+  logger: {
+    type: "Console"
   }
 };
 
