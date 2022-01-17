@@ -2,13 +2,15 @@ import { ServiceBroker } from "moleculer";
 import path from "path";
 
 describe("TEST auth", () => {
-  const broker = new ServiceBroker();
+  const broker = new ServiceBroker({ logger: false });
 
   broker.loadService(path.join(__dirname, "Auth.Service.ts"));
 
   beforeAll(async () => {
     await broker.start();
   });
+
+  beforeEach(async () => {});
 
   afterAll(async () => {
     await broker.stop();
