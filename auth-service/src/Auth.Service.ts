@@ -5,7 +5,7 @@ import {
   Service as MoleculerService
 } from "moleculer";
 import { Action, Method, Service } from "moleculer-decorators";
-import { Connection, createConnection } from "typeorm";
+import { Connection, createConnection, getCustomRepository } from "typeorm";
 import { User } from "./entity";
 import { BaseInternalError, BaseServiceError, ValidationError } from "./errors";
 import { UserRepository } from "./repository";
@@ -55,7 +55,7 @@ class AuthService extends MoleculerService {
   // called always when broker is started
   async started() {
     this.dbConnection = await createConnection();
-    this.userRepo = this.dbConnection.getCustomRepository(UserRepository);
+    this.userRepo = getCustomRepository(UserRepository);
     this.authToken = new JWT("secret", "24h");
     this.logger = this.broker.logger;
   }

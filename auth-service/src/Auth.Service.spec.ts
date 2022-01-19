@@ -1,12 +1,14 @@
 import { ServiceBroker } from "moleculer";
-import { mocked } from "ts-jest/utils";
-import { getCustomRepository } from "typeorm";
 import path from "path";
+import { createSandbox } from "sinon";
+import { mocked } from "ts-jest/utils";
+import { Connection, getCustomRepository } from "typeorm";
 import { User } from "./entity";
 
-jest.mock("typeorm");
-
 describe("TEST auth", () => {
+  const sandbox = createSandbox();
+  const connectionStub = sandbox.createStubInstance(Connection);
+
   const broker = new ServiceBroker({ logger: false });
 
   broker.loadService(path.join(__dirname, "Auth.Service.ts"));
