@@ -1,8 +1,14 @@
 import { ServiceBroker } from "moleculer";
 import path from "path";
-import { mocked } from "ts-jest/utils";
-import { getCustomRepository } from "typeorm";
 import { User } from "./entity";
+
+jest.mock("./utils/DBConnectionManager");
+jest.mock("typeorm", () => {
+  return {
+    ...jest.requireActual("typeorm"),
+    getCustomRepository: jest.fn()
+  };
+});
 
 describe("TEST auth", () => {
   const broker = new ServiceBroker({ logger: false });
@@ -26,12 +32,6 @@ describe("TEST auth", () => {
     user.createdAt = new Date();
     user.updatedAt = new Date();
 
-    const userRepo = {
-      saveNewUser: jest.fn().mockResolvedValueOnce(user)
-    };
-
-    mocked(getCustomRepository).mockReturnValueOnce(userRepo);
-
     const res: any = await broker.call("auth.signUp", {
       username: "asdsdf",
       email: "asdadasd@mail.com",
@@ -39,10 +39,7 @@ describe("TEST auth", () => {
       confirmPassword: "asdasds"
     });
 
-    expect(getCustomRepository).toHaveBeenCalledTimes(1);
-    expect(getCustomRepository).toBeCalledWith(userRepo);
-
-    expect(userRepo.saveNewUser).toBeCalledTimes(1);
+    // expect(gcp).toHaveBeenCalledTimes(1);
 
     expect(res).toBeDefined();
     expect(res.http_status_code).toEqual(201);

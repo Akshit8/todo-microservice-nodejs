@@ -5,11 +5,11 @@ import {
   Service as MoleculerService
 } from "moleculer";
 import { Action, Method, Service } from "moleculer-decorators";
-import { Connection, createConnection, getCustomRepository } from "typeorm";
+import { getCustomRepository } from "typeorm";
 import { User } from "./entity";
 import { BaseInternalError, BaseServiceError, ValidationError } from "./errors";
 import { UserRepository } from "./repository";
-import { AuthToken, JWT } from "./utils";
+import { AuthToken, DBConnectionManager, JWT } from "./utils";
 
 interface ServiceError {
   error_code: string;
@@ -47,24 +47,25 @@ interface ActionResponse {
   }
 })
 class AuthService extends MoleculerService {
-  private dbConnection: Connection;
+  public logger: LoggerInstance;
+  private dbConnectionManager: DBConnectionManager;
   private userRepo: UserRepository;
   private authToken: AuthToken;
-  public logger: LoggerInstance;
 
   // called always when broker is started
   async started() {
-    this.dbConnection = await createConnection();
+    this.logger = this.broker.logger;
+
+    this.dbConnectionManager = new DBConnectionManager(this.logger);
+    await this.dbConnectionManager.connect();
+
     this.userRepo = getCustomRepository(UserRepository);
     this.authToken = new JWT("secret", "24h");
-    this.logger = this.broker.logger;
   }
 
   // called always when broker is stopped
   async stopped() {
-    if (this.dbConnection && this.dbConnection.isConnected) {
-      await this.dbConnection.close();
-    }
+    await this.dbConnectionManager.close();
   }
 
   @Method
