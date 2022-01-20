@@ -62,7 +62,7 @@ class AuthService extends MoleculerService {
 
   // called always when broker is stopped
   async stopped() {
-    if (this.dbConnection) {
+    if (this.dbConnection && this.dbConnection.isConnected) {
       await this.dbConnection.close();
     }
   }

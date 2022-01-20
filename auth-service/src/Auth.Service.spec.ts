@@ -1,14 +1,10 @@
 import { ServiceBroker } from "moleculer";
 import path from "path";
-import { createSandbox } from "sinon";
 import { mocked } from "ts-jest/utils";
-import { Connection, getCustomRepository } from "typeorm";
+import { getCustomRepository } from "typeorm";
 import { User } from "./entity";
 
 describe("TEST auth", () => {
-  const sandbox = createSandbox();
-  const connectionStub = sandbox.createStubInstance(Connection);
-
   const broker = new ServiceBroker({ logger: false });
 
   broker.loadService(path.join(__dirname, "Auth.Service.ts"));
@@ -34,7 +30,6 @@ describe("TEST auth", () => {
       saveNewUser: jest.fn().mockResolvedValueOnce(user)
     };
 
-    // mocked(createConnection).mockReturnValueOnce();
     mocked(getCustomRepository).mockReturnValueOnce(userRepo);
 
     const res: any = await broker.call("auth.signUp", {
