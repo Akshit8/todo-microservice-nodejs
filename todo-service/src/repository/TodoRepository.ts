@@ -1,7 +1,8 @@
-import { Repository, TypeORMError } from "typeorm";
+import { EntityRepository, Repository, TypeORMError } from "typeorm";
 import { Todo } from "../entity";
 import { ORMError, ResourceNotFoundError } from "../errors";
 
+@EntityRepository(Todo)
 export class TodoRepository extends Repository<Todo> {
   async addNewTodo(actionItem: string, owner: number): Promise<Todo> {
     let todo = new Todo(actionItem, owner);

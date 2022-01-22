@@ -1,0 +1,6 @@
+{
+  "watch": ["src"],
+  "ext": ".ts",
+  "ignore": [],
+  "exec": "ts-node node_modules/moleculer/bin/moleculer-runner --config moleculer.config.ts src/*.Service.ts"
+}

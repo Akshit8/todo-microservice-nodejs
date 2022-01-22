@@ -6,7 +6,7 @@
     "gateway-dev": "npm run dev --prefix ./api-gateway",
     "auth-dev": "npm run dev --prefix ./auth-service",
     "todo-dev": "npm run dev --prefix ./todo-service",
-    "dev": "nodemon",
+    "dev": "concurrently \"npm:gateway-dev\" \"npm:auth-dev\" \"npm:todo-dev\"",
     "lint": "eslint --fix --ext .ts,.js .",
     "lint:ts": "eslint --fix --ext .ts .",
     "lint:js": "eslint --fix --ext .js .",
@@ -42,7 +42,6 @@
     "eslint-plugin-promise": "^5.2.0",
     "husky": "^7.0.0",
     "lint-staged": "^12.1.7",
-    "nodemon": "^2.0.15",
     "prettier": "^2.5.1",
     "typescript": "^4.5.4"
   }
