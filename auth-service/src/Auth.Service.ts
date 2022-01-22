@@ -142,6 +142,7 @@ class AuthService extends MoleculerService {
     if (params.password !== params.confirmPassword) {
       throw new ValidationError("confirmation password invalid");
     }
+
     const user = await this.userRepo.saveNewUser(
       params.username,
       params.email,
