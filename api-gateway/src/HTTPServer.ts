@@ -1,18 +1,35 @@
 import { Express } from "express";
-import { Server } from "http";
+import { createServer, Server } from "http";
 
 class HTTPServer {
   private server: Server;
+  private host: string = "0.0.0.0";
   private port: number;
 
-  constructor(server: Server, port: number) {
-    this.server = server;
+  constructor(app: Express, port: number) {
     this.port = port;
+
+    this.server = createServer(app);
+  }
+
+  startCallBack = (): void => {
+    console.log(`server listening at ${this.host}:${this.port}`);
+  };
+
+  start() {
+    this.server.listen(this.port, this.startCallBack);
+
+    this.registerServerEventHandlers();
+  }
+
+  stop() {
+    this.server.close();
   }
 
   registerServerEventHandlers() {
     this.server.on("error", (err: Error): void => {
-      throw err;
+      console.error(err);
+      this.stop();
     });
 
     this.server.on("close", () => {
@@ -20,25 +37,14 @@ class HTTPServer {
     });
 
     process.on("SIGTERM", () => {
-      console.log("shutting http server gracefully");
-      this.server.close();
+      console.log("shutting http server gracefully...");
+      this.stop();
     });
 
     process.on("SIGINT", () => {
-      console.log("interupt signal recieved shutting down");
-      this.server.close();
+      console.log("interupt signal recieved shutting down...");
+      this.stop();
     });
-  }
-
-  static createServer(app: Express, port: number) {
-    const httpServer = new HTTPServer(
-      app.listen(port, () => {
-        console.log("server started at ", port);
-      }),
-      port
-    );
-
-    httpServer.registerServerEventHandlers();
   }
 }
 

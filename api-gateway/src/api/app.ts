@@ -1,6 +1,6 @@
 import cors from "cors";
 import express, { Express } from "express";
-import { notFoundHandler, serverErrorHandler } from "./handlers";
+import { healthCheck, notFoundHandler, serverErrorHandler } from "./handlers";
 import router from "./router";
 
 export const createExpressApp = (): Express => {
@@ -11,7 +11,8 @@ export const createExpressApp = (): Express => {
   app.use(express.json());
   app.use(express.urlencoded({ extended: true }));
 
-  app.use(router);
+  app.get("/health", healthCheck);
+  app.use("/api", router);
 
   app.use(notFoundHandler);
 

@@ -1,25 +1,19 @@
 import { createExpressApp } from "./api";
+import { createGatewayMoleculerService } from "./broker";
 import HTTPServer from "./HTTPServer";
-
-// const gatewayBroker = new ServiceBroker(brokerConfig);
-
-// const createGatewayService = async (): Promise<void> => {
-//   gatewayBroker.createService({
-//     name: "gateway-service"
-//   });
-
-//   await gatewayBroker.start();
-// };
-
-// createGatewayService();
 
 (async () => {
   try {
+    const gatewayBroker = createGatewayMoleculerService();
+    await gatewayBroker.start();
+
     const app = createExpressApp();
-    HTTPServer.createServer(app, 3000);
-    HTTPServer.createServer(app, 3001);
+    const httpServer = new HTTPServer(app, 3000);
+
+    httpServer.start();
   } catch (err) {
-    console.log(err);
+    // to handle broker relates errors only.
+    console.error(err);
     process.exit(1);
   }
 })();
