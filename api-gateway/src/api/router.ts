@@ -5,8 +5,8 @@ import { TodoControllerV1 } from "./todo.controller";
 
 const router = Router();
 
-const authRouterV1 = AuthControllerV1.buildControllerRoutes(router, TokenMiddleware);
-const todoRouterV1 = TodoControllerV1.buildControllerRoutes(router, TokenMiddleware);
+const authRouterV1 = AuthControllerV1.buildControllerRoutes(TokenMiddleware);
+const todoRouterV1 = TodoControllerV1.buildControllerRoutes(TokenMiddleware);
 
 router.use("/v1/auth", authRouterV1);
 router.use("/v1/todo", todoRouterV1);

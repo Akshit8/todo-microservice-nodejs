@@ -1,31 +1,39 @@
 import { NextFunction, Request, Response, Router } from "express";
-import { ServiceBroker } from "moleculer";
-import { ExpressMiddleware } from "./types";
-import { getServiceBroker } from "../broker";
+import { ExpressMiddleware, ServiceResponse } from "./types";
+import { catchAsync, renderAPIResponse } from "./utils";
+import { broker } from "../broker";
 
 export class AuthControllerV1 {
-  private broker: ServiceBroker;
+  static buildControllerRoutes(tokenMiddleware: ExpressMiddleware): Router {
+    const authController = new AuthControllerV1();
 
-  constructor(broker: ServiceBroker) {
-    this.broker = broker;
-  }
+    const router = Router();
 
-  static buildControllerRoutes(
-    router: Router,
-    tokenMiddleware: ExpressMiddleware
-  ): Router {
-    const authController = new AuthControllerV1(getServiceBroker());
-
-    router.post("/signup", authController.login);
-    router.post("/login", authController.login);
-    router.post("/user/:id", tokenMiddleware, authController.user);
+    router.post("/signup", catchAsync(authController.signup));
+    router.post("/login", catchAsync(authController.login));
+    router.get("/user", tokenMiddleware, catchAsync(authController.user));
 
     return router;
   }
 
-  async signup(req: Request, res: Response, next: NextFunction) {}
+  async signup(req: Request, res: Response, next: NextFunction) {
+    const response = (await broker.call("auth.signUp", {
+      ...req.body
+    })) as ServiceResponse;
+    renderAPIResponse(response, res);
+  }
 
-  async login(req: Request, res: Response, next: NextFunction) {}
+  async login(req: Request, res: Response, next: NextFunction) {
+    const response = (await broker.call("auth.login", {
+      ...req.body
+    })) as ServiceResponse;
+    renderAPIResponse(response, res);
+  }
 
-  async user(req: Request, res: Response, next: NextFunction) {}
+  async user(req: Request, res: Response, next: NextFunction) {
+    const response = (await broker.call("auth.getUser", {
+      ...req.body
+    })) as ServiceResponse;
+    renderAPIResponse(response, res);
+  }
 }

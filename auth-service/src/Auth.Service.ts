@@ -7,7 +7,12 @@ import {
 import { Action, Method, Service } from "moleculer-decorators";
 import { getCustomRepository } from "typeorm";
 import { User } from "./entity";
-import { BaseInternalError, BaseServiceError, ValidationError } from "./errors";
+import {
+  BadRequestError,
+  BaseInternalError,
+  BaseServiceError,
+  ValidationError
+} from "./errors";
 import { UserRepository } from "./repository";
 import { AuthToken, DBConnectionManager, JWT } from "./utils";
 
@@ -88,7 +93,11 @@ class AuthService extends MoleculerService {
   renderServiceResponse(ctx: Context, res: ActionResponse): ServiceResponse {
     return {
       success: true,
-      ...res
+      http_status_code: res.http_status_code,
+      data: {
+        user: res.user,
+        token: res.token
+      }
     };
   }
 
@@ -162,7 +171,7 @@ class AuthService extends MoleculerService {
   }: Context<{ username: string; password: string }>): Promise<ActionResponse> {
     const user = await this.userRepo.loginUser(params.username, params.password);
     if (!user) {
-      throw new Error("invalid login");
+      throw new BadRequestError("invalid username or password");
     }
     const token = await this.authToken.signToken({ id: user.id });
     return { http_status_code: 200, token };

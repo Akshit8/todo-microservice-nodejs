@@ -1,17 +1,12 @@
 import { ServiceBroker } from "moleculer";
 import { brokerConfig } from "./moleculer.config";
 
-export let broker: ServiceBroker;
+export const broker = new ServiceBroker(brokerConfig);
 
-export const createGatewayMoleculerService = (): ServiceBroker => {
-  broker = new ServiceBroker(brokerConfig);
+export const setupGatewayMoleculerService = async (): Promise<void> => {
   broker.createService({
-    name: "gateway-service"
+    name: "gateway"
   });
 
-  return broker;
-};
-
-export const getServiceBroker = (): ServiceBroker => {
-  return broker;
+  await broker.start();
 };

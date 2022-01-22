@@ -1,7 +1,7 @@
 import { NextFunction, Request, Response, Router } from "express";
 import { ServiceBroker } from "moleculer";
 import { ExpressMiddleware } from "./types";
-import { getServiceBroker } from "../broker";
+import { broker } from "../broker";
 
 export class TodoControllerV1 {
   private broker: ServiceBroker;
@@ -10,11 +10,10 @@ export class TodoControllerV1 {
     this.broker = broker;
   }
 
-  static buildControllerRoutes(
-    router: Router,
-    tokenMiddleware: ExpressMiddleware
-  ): Router {
-    const todoController = new TodoControllerV1(getServiceBroker());
+  static buildControllerRoutes(tokenMiddleware: ExpressMiddleware): Router {
+    const todoController = new TodoControllerV1(broker);
+
+    const router = Router();
 
     router.post("/", tokenMiddleware, todoController.create);
     router.get("/:id", tokenMiddleware, todoController.get);

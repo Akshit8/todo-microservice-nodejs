@@ -5,7 +5,7 @@ export const TokenMiddleware = (
   res: Response,
   next: NextFunction
 ): void => {
-  const token = req.header("Authorization")?.replace("Bearer", "");
+  const token = req.header("Authorization")?.replace("Bearer ", "");
   req.body.token = token;
   next();
 };
