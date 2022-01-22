@@ -1,5 +1,5 @@
 import { NextFunction, Request, Response, Router } from "express";
-import { ExpressMiddleware } from "./middleware";
+import { ExpressMiddleware } from "./types";
 
 export class TodoControllerV1 {
   static buildControllerRoutes(
