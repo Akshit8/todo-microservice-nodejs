@@ -11,8 +11,8 @@
     "lint:ci": "eslint --ext .ts,.js .",
     "lint:ts": "eslint --fix --ext .ts .",
     "lint:js": "eslint --fix --ext .js .",
-    "format": "prettier --ignore-path .gitignore --write \"**/*.+(js|ts|json|yaml|yml)\"",
-    "format:ci": "prettier --ignore-path .gitignore --check \"**/*.+(js|ts|json|yaml|yml)\"",
+    "format": "prettier --ignore-path .gitignore --write \"**/*.+(js|ts|json|yaml)\"",
+    "format:ci": "prettier --ignore-path .gitignore --check \"**/*.+(js|ts|json|yaml)\"",
     "prepare": "husky install",
     "dev:env": "docker-compose -f docker-compose.dev.yaml up -d"
   },
