@@ -4,7 +4,7 @@
   "description": "API gateway for microservice system",
   "main": "src/main.ts",
   "scripts": {
-    "compile": "tsc -p tsconfig.json",
+    "build": "tsc -p tsconfig.json",
     "dev": "nodemon",
     "start": "node dist/main.js"
   },
