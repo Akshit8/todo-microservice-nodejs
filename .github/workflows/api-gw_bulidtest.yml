@@ -1,0 +1,27 @@
+name: Check for build errors
+
+on:
+  pull_request:
+    branches:
+      - "master"
+    paths:
+      - "api-gateway/**"
+
+jobs:
+  build_api_gw:
+    name: build-api-gw
+    runs-on: ubuntu-latest
+    steps:
+      - name: checkout
+        uses: actions/checkout@v2
+
+      - name: setup node
+        uses: actions/setup-node@v2
+        with:
+          node-version: "16"
+
+      - name: install dependencies
+        run: npm ci
+
+      - name: build application
+        run: npm run build
