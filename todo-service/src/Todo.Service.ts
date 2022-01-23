@@ -5,11 +5,11 @@ import {
   Service as MoleculerService
 } from "moleculer";
 import { Action, Method, Service } from "moleculer-decorators";
-import { Connection, createConnection } from "typeorm";
+import { getCustomRepository } from "typeorm";
 import { Todo } from "./entity";
-import { BaseInternalError, BaseServiceError, ValidationError } from "./errors";
+import { BaseInternalError, BaseServiceError } from "./errors";
 import { TodoRepository } from "./repository";
-import { AuthToken, JWT } from "./utils";
+import { AuthToken, DBConnectionManager, JWT } from "./utils";
 
 interface ServiceError {
   error_code: string;
@@ -47,28 +47,31 @@ interface ActionResponse {
   }
 })
 class TodoService extends MoleculerService {
-  private dbConnection: Connection;
+  public logger: LoggerInstance;
+  private dbConnectionManager: DBConnectionManager;
   private todoRepo: TodoRepository;
   private authToken: AuthToken;
-  public logger: LoggerInstance;
 
+  // called always when broker is started
   async started() {
-    this.dbConnection = await createConnection();
-    this.todoRepo = this.dbConnection.getCustomRepository(TodoRepository);
-    this.authToken = new JWT("secret");
     this.logger = this.broker.logger;
+
+    this.dbConnectionManager = new DBConnectionManager(this.logger);
+    await this.dbConnectionManager.connect();
+
+    this.todoRepo = getCustomRepository(TodoRepository);
+    this.authToken = new JWT("secret", "24h");
   }
 
+  // called always when broker is stopped
   async stopped() {
-    if (this.dbConnection) {
-      await this.dbConnection.close();
-    }
+    await this.dbConnectionManager.close();
   }
 
   @Method
-  async authMiddleware(ctx: Context<{ token: string; id: number }>): Promise<void> {
+  async authMiddleware(ctx: Context<{ token: string; owner?: number }>): Promise<void> {
     const tokenPayload = await this.authToken.verifyToken(ctx.params.token);
-    ctx.params.id = Number(tokenPayload.id);
+    ctx.params.owner = Number(tokenPayload.id);
   }
 
   @Method
@@ -80,7 +83,11 @@ class TodoService extends MoleculerService {
   renderServiceResponse(ctx: Context, res: ActionResponse): ServiceResponse {
     return {
       success: true,
-      ...res
+      http_status_code: res.http_status_code,
+      data: {
+        todo: res.todo,
+        todos: res.todos
+      }
     };
   }
 
@@ -89,10 +96,6 @@ class TodoService extends MoleculerService {
     ctx: Context,
     err: Error | BaseInternalError | BaseServiceError | Errors.MoleculerError
   ): ServiceResponse {
-    if (err instanceof Errors.ValidationError) {
-      err = new ValidationError();
-    }
-
     if (err instanceof BaseInternalError || err instanceof Errors.MoleculerError) {
       this.logger.error(err);
       if (err instanceof BaseInternalError) {
@@ -119,28 +122,67 @@ class TodoService extends MoleculerService {
     };
   }
 
-  @Action()
-  async addTodo({ params }: Context<{}>): Promise<ActionResponse> {
-    return { http_status_code: 200 };
+  @Action({
+    params: {
+      actionItem: { type: "string" }
+    }
+  })
+  async createTodo({
+    params
+  }: Context<{ actionItem: string; owner: number }>): Promise<ActionResponse> {
+    const todo = await this.todoRepo.addNewTodo(params.actionItem, params.owner);
+    return { http_status_code: 201, todo };
+  }
+
+  @Action({
+    params: {
+      id: { type: "number" }
+    }
+  })
+  async getTodo({
+    params
+  }: Context<{ id: number; owner: number }>): Promise<ActionResponse> {
+    const todo = await this.todoRepo.getTodoById(params.id, params.owner);
+    return { http_status_code: 200, todo };
   }
 
   @Action()
-  async getTodo({ params }: Context<{}>): Promise<ActionResponse> {
-    return { http_status_code: 200 };
+  async getAllTodos({ params }: Context<{ owner: number }>): Promise<ActionResponse> {
+    const todos = await this.todoRepo.getAllTodos(params.owner);
+    return { http_status_code: 200, todos };
   }
 
-  @Action()
-  async getAllTodos({ params }: Context<{}>): Promise<ActionResponse> {
-    return { http_status_code: 200 };
+  @Action({
+    params: {
+      id: { type: "number" },
+      actionItem: { type: "string", nullable: true },
+      complete: { type: "boolean", nullable: true }
+    }
+  })
+  async updateTodo({
+    params
+  }: Context<{
+    id: number;
+    owner: number;
+    actionItem?: string;
+    complete?: boolean;
+  }>): Promise<ActionResponse> {
+    const todo = await this.todoRepo.updateTodo(params.id, params.owner, {
+      actionItem: params.actionItem,
+      complete: params.complete
+    });
+    return { http_status_code: 200, todo };
   }
 
-  @Action()
-  async updateTodo({ params }: Context<{}>): Promise<ActionResponse> {
-    return { http_status_code: 200 };
-  }
-
-  @Action()
-  async deleteTodo({ params }: Context<{}>): Promise<ActionResponse> {
+  @Action({
+    params: {
+      id: { type: "number" }
+    }
+  })
+  async deleteTodo({
+    params
+  }: Context<{ id: number; owner: number }>): Promise<ActionResponse> {
+    await this.todoRepo.deleteTodo(params.id, params.owner);
     return { http_status_code: 200 };
   }
 }

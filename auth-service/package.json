@@ -6,6 +6,7 @@
   "scripts": {
     "build": "tsc -p tsconfig.json",
     "dev": "nodemon",
+    "start": "node node_modules/moleculer/bin/moleculer-runner --config moleculer.config.js src/*.Service.js",
     "repl": "ts-node node_modules/moleculer/bin/moleculer-runner --hot --repl --config moleculer.config.ts src/*.Service.ts",
     "typeorm": "node --require ts-node/register ./node_modules/typeorm/cli.js",
     "migration:generate": "npm run typeorm migration:generate -- -n ",

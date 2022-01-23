@@ -1,4 +1,4 @@
-name: Check for build errors
+name: Check for api-gw build errors
 
 on:
   pull_request:

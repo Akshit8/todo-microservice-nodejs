@@ -6,7 +6,9 @@ export const tokenMiddleware = (
   next: NextFunction
 ): void => {
   const token = req.header("Authorization")?.replace("Bearer ", "");
-  req.body.token = token;
+  if (token) {
+    req.body.token = token;
+  }
   next();
 };
 
@@ -28,7 +30,7 @@ export const urlParamsMiddleware = (
 ): void => {
   for (const key in req.params) {
     if (key === "id") {
-      req.body.id = req.params.id;
+      req.body.id = Number(req.params.id);
     }
   }
   next();
