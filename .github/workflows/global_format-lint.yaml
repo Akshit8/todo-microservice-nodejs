@@ -1,0 +1,28 @@
+name: Check for style and lint errors
+
+on:
+  pull_request:
+    branches:
+      - "master"
+
+jobs:
+  format_and_lint:
+    name: format and lint codebase
+    runs-on: ubuntu-latest
+    steps:
+      - name: checkout
+        uses: actions/checkout@v2
+
+      - name: setup node
+        uses: actions/setup-node@v2
+        with:
+          node-version: "16"
+
+      - name: install dependencies
+        run: npm ci
+
+      - name: check code styling
+        run: npm run format:ci
+
+      - name: check linting errors
+        run: npm run lint:ci
