@@ -1,0 +1,16 @@
+name: Push api-gw image to ecr
+
+on:
+  push:
+    branches:
+      - "master"
+    paths:
+      - "api-gateway/**"
+
+jobs:
+  push_to_ecr:
+    name: push to ecr
+    runs-on: ubuntu-latest
+    steps:
+      - name: checkout
+        uses: actions/checkout@v2
