@@ -2,7 +2,7 @@ import { NextFunction, Request, Response } from "express";
 import { APIError, InternalServerError, NotFoundError } from "./error";
 
 export const healthCheck = (req: Request, res: Response, next: NextFunction) => {
-  res.send({ success: true, message: "application healthy" });
+  res.send({ success: true, message: "ok" });
 };
 
 export const notFoundHandler = (req: Request, res: Response, next: NextFunction) => {
