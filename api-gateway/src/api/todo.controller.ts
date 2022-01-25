@@ -1,7 +1,7 @@
 import { NextFunction, Request, Response, Router } from "express";
 import { urlParamsMiddleware } from "./middleware";
 import { ServiceResponse } from "./types";
-import { renderAPIResponse } from "./utils";
+import { catchAsync, renderAPIResponse } from "./utils";
 import { getServiceBroker } from "../moleculer/broker";
 
 const broker = getServiceBroker();
@@ -12,11 +12,11 @@ export class TodoControllerV1 {
 
     const router = Router();
 
-    router.post("/", todoController.create);
-    router.get("/:id", urlParamsMiddleware, todoController.get);
-    router.get("/", todoController.getAll);
-    router.patch("/:id", urlParamsMiddleware, todoController.update);
-    router.delete("/:id", urlParamsMiddleware, todoController.delete);
+    router.post("/", catchAsync(todoController.create));
+    router.get("/:id", urlParamsMiddleware, catchAsync(todoController.get));
+    router.get("/", catchAsync(todoController.getAll));
+    router.patch("/:id", urlParamsMiddleware, catchAsync(todoController.update));
+    router.delete("/:id", urlParamsMiddleware, catchAsync(todoController.delete));
 
     return router;
   }

@@ -4,6 +4,7 @@ import { catchAsync, renderAPIResponse } from "./utils";
 import { getServiceBroker } from "../moleculer/broker";
 
 const broker = getServiceBroker();
+
 export class AuthControllerV1 {
   static buildControllerRoutes(): Router {
     const authController = new AuthControllerV1();
