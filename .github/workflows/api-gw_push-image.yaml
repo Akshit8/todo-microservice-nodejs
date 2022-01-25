@@ -35,19 +35,18 @@ jobs:
 
       - name: Install skaffold
         run: |
-          - curl -Lo skaffold https://storage.googleapis.com/skaffold/releases/latest/skaffold-linux-amd64
-          - sudo install skaffold /usr/local/bin/
+          curl -Lo skaffold https://storage.googleapis.com/skaffold/releases/latest/skaffold-linux-amd64
+          sudo install skaffold /usr/local/bin/
 
       - name: build and push image
         run: |
-          - cd $PROJECT
-          - skaffold build -p production
+          cd $PROJECT
+          skaffold build -p production
 
       - name: tag image (latest)
         run: |
-          - TAG=$(git rev-parse --short HEAD)
-          - docker tag $IMAGE:$TAG $IMAGE:latest
+          TAG=$(git rev-parse --short HEAD)
+          docker tag $IMAGE:$TAG $IMAGE:latest
 
       - name: push tag (latest)
-        run: |
-          - docker push $IMAGE:latest
+        run: docker push $IMAGE:latest
