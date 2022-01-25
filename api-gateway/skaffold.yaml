@@ -1,0 +1,25 @@
+apiVersion: skaffold/v2beta22
+kind: Config
+metadata:
+  name: api-gateway
+
+build:
+  local:
+    useDockerCLI: true
+    useBuildkit: true
+  tagPolicy:
+    gitCommit:
+      variant: AbbrevCommitSha
+      ignoreChanges: true
+
+profiles:
+  - name: production
+    build:
+      artifacts:
+        - image: 244915878721.dkr.ecr.ap-south-1.amazonaws.com/api-gateway
+          context: .
+          docker:
+            dockerfile: Dockerfile
+            cacheFrom:
+              - "244915878721.dkr.ecr.ap-south-1.amazonaws.com/api-gateway:latest"
+            squash: false

@@ -1,5 +1,8 @@
 import { NextFunction, Request, Response } from "express";
 import { APIError, InternalServerError, NotFoundError } from "./error";
+import { getAppLogger } from "../logger";
+
+const logger = getAppLogger();
 
 export const healthCheck = (req: Request, res: Response, next: NextFunction) => {
   res.send({ success: true, message: "ok" });
@@ -16,7 +19,7 @@ export const serverErrorHandler = (
   next: NextFunction
 ) => {
   // TODO
-  console.log(err);
+  logger.error(err);
   let e = err as APIError;
   if (!(err instanceof APIError)) {
     e = new InternalServerError();
