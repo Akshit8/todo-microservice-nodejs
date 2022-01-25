@@ -18,5 +18,5 @@ build:
       docker:
         dockerfile: Dockerfile
         cacheFrom:
-          - "244915878721.dkr.ecr.ap-south-1.amazonaws.com/api-gateway:latest"
+          - 244915878721.dkr.ecr.ap-south-1.amazonaws.com/api-gateway
         squash: false

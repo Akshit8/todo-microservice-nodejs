@@ -1,10 +1,9 @@
 import { createExpressApp } from "./api";
-import { setupGatewayMoleculerService } from "./broker";
 import HTTPServer from "./HTTPServer";
 
 (async () => {
   try {
-    await setupGatewayMoleculerService();
+    // await setupGatewayMoleculerService();
 
     const app = createExpressApp();
     const httpServer = new HTTPServer(app, 3000);
