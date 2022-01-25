@@ -12,7 +12,7 @@ jobs:
     name: push to ecr
     runs-on: ubuntu-latest
     env:
-      IMAGE_REPO: api-gateway
+      PROJECT: api-gateway
     steps:
       - name: checkout
         uses: actions/checkout@v2
@@ -31,7 +31,7 @@ jobs:
         uses: aws-actions/amazon-ecr-login@v1
 
       - name: set image name
-        run: echo "IMAGE=${{ secrets.DOCKER_REGISTRY }}/$IMAGE_REPO" >> $GITHUB_ENV
+        run: echo "IMAGE=${{ secrets.DOCKER_REGISTRY }}/$PROJECT" >> $GITHUB_ENV
 
       - name: Install skaffold
         run: |
@@ -40,7 +40,7 @@ jobs:
 
       - name: build and push image
         run: |
-          - cd api-gateway
+          - cd $PROJECT
           - skaffold build -p production
 
       - name: tag image (latest)
