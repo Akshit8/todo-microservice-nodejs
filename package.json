@@ -14,7 +14,8 @@
     "format": "prettier --ignore-path .gitignore --write \"**/*.+(js|ts|json|yaml)\"",
     "format:ci": "prettier --ignore-path .gitignore --check \"**/*.+(js|ts|json|yaml)\"",
     "prepare": "husky install",
-    "dev:env": "docker-compose -f docker-compose.dev.yaml up -d"
+    "dev:env": "docker-compose -f docker-compose.dev.yaml up -d",
+    "aws-cli": "docker run --rm -ti -v ${PWD}/.aws:/root/.aws amazon/aws-cli"
   },
   "repository": {
     "type": "git",

@@ -7,15 +7,16 @@ build:
     push: false
     useDockerCLI: true
     useBuildkit: true
+    tryImportMissing: true
   tagPolicy:
     gitCommit:
       variant: AbbrevCommitSha
       ignoreChanges: true
   artifacts:
-    - image: api-gw-skaffold
+    - image: 244915878721.dkr.ecr.ap-south-1.amazonaws.com/api-gateway
       context: .
       docker:
         dockerfile: Dockerfile
         cacheFrom:
-          - api-gw-skaffold
+          - "244915878721.dkr.ecr.ap-south-1.amazonaws.com/api-gateway:latest"
         squash: false
