@@ -1,18 +1,10 @@
 import { createExpressApp } from "./api";
-import { setupGatewayMoleculerService } from "./broker";
-import HTTPServer from "./HTTPServer";
+import ApplicationProcessManager from "./ApplicationProcessManager";
+import { createMoleculerServiceBroker } from "./moleculer/broker";
 
-(async () => {
-  try {
-    await setupGatewayMoleculerService();
-
-    const app = createExpressApp();
-    const httpServer = new HTTPServer(app, 3000);
-
-    httpServer.start();
-  } catch (err) {
-    // to handle broker relates errors only.
-    console.error(err);
-    process.exit(1);
-  }
+(() => {
+  const expressApp = createExpressApp();
+  const broker = createMoleculerServiceBroker();
+  const application = new ApplicationProcessManager(expressApp, broker);
+  application.start();
 })();

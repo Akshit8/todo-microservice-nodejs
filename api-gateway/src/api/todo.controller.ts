@@ -1,27 +1,22 @@
 import { NextFunction, Request, Response, Router } from "express";
-import { ServiceBroker } from "moleculer";
 import { urlParamsMiddleware } from "./middleware";
 import { ServiceResponse } from "./types";
 import { renderAPIResponse } from "./utils";
-import { broker } from "../broker";
+import { getServiceBroker } from "../moleculer/broker";
+
+const broker = getServiceBroker();
 
 export class TodoControllerV1 {
-  private broker: ServiceBroker;
-
-  constructor(broker: ServiceBroker) {
-    this.broker = broker;
-  }
-
   static buildControllerRoutes(): Router {
-    const todoController = new TodoControllerV1(broker);
+    const todoController = new TodoControllerV1();
 
     const router = Router();
 
     router.post("/", todoController.create);
     router.get("/:id", urlParamsMiddleware, todoController.get);
     router.get("/", todoController.getAll);
-    router.patch("/:id", todoController.update);
-    router.delete("/:id", todoController.delete);
+    router.patch("/:id", urlParamsMiddleware, todoController.update);
+    router.delete("/:id", urlParamsMiddleware, todoController.delete);
 
     return router;
   }

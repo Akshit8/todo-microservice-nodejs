@@ -1,8 +1,9 @@
 import { NextFunction, Request, Response, Router } from "express";
 import { ServiceResponse } from "./types";
 import { catchAsync, renderAPIResponse } from "./utils";
-import { broker } from "../broker";
+import { getServiceBroker } from "../moleculer/broker";
 
+const broker = getServiceBroker();
 export class AuthControllerV1 {
   static buildControllerRoutes(): Router {
     const authController = new AuthControllerV1();
