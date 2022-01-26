@@ -3,9 +3,10 @@ name: Push api-gw image to ecr
 on:
   push:
     branches:
-      - "master"
-    paths:
-      - "api-gateway/**"
+      - master
+      - develop
+    # paths:
+    #   - "api-gateway/**"
 
 jobs:
   push_to_ecr:
