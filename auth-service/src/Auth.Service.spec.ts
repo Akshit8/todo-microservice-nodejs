@@ -1,20 +1,50 @@
-import { ServiceBroker } from "moleculer";
-import { getCustomRepository } from "typeorm";
+import faker from "@faker-js/faker";
+import { mocked } from "jest-mock";
+import { BrokerOptions, Errors, ServiceBroker } from "moleculer";
 import path from "path";
+import { ServiceResponse } from "./Auth.Service";
 import { User } from "./entity";
+import { ValidationError } from "./errors";
+import { UserRepository } from "./repository";
 
-jest.mock("typeorm", () => {
-  return {
-    ...jest.requireActual("typeorm")
-  };
-});
+// mocks
+jest.mock("./utils");
+jest.mock("./repository");
 
-const mockedGetCustomRepository = getCustomRepository as jest.Mock<
-  typeof getCustomRepository
->;
+const moleculerTestConfig = {
+  logger: false,
+  errorHandler: (err: Error, info: any) => {
+    if (err instanceof Errors.ValidationError) {
+      const e = new ValidationError(err.data[0].message);
 
-describe("TEST auth", () => {
-  const broker = new ServiceBroker({ logger: false });
+      return {
+        success: false,
+        http_status_code: e.http_status_code,
+        error: {
+          error_code: e.internal_status_code,
+          error_type: e.type,
+          error_message: e.message
+        }
+      };
+    }
+
+    throw err;
+  }
+} as BrokerOptions;
+
+const getFakeUser = (): User => {
+  const user = new User();
+  user.id = Math.floor(Math.random() * 1000 + 1);
+  user.username = faker.name.firstName();
+  user.email = faker.internet.email(user.username);
+  user.password = faker.random.alphaNumeric(8);
+  user.createdAt = new Date();
+  user.updatedAt = new Date();
+  return user;
+};
+
+describe("TEST auth-service", () => {
+  const broker = new ServiceBroker(moleculerTestConfig);
 
   broker.loadService(path.join(__dirname, "Auth.Service.ts"));
 
@@ -26,28 +56,21 @@ describe("TEST auth", () => {
     await broker.stop();
   });
 
-  test("sample", async () => {
-    const user = new User();
-    user.id = 1;
-    user.username = "asd";
-    user.email = "asdsda";
-    user.password = "asdsd";
-    user.createdAt = new Date();
-    user.updatedAt = new Date();
+  test("signUp - ok", async () => {
+    const user = getFakeUser();
+    mocked(UserRepository.prototype.saveNewUser).mockResolvedValueOnce(user);
 
-    const userRepo: any = {
-      saveNewUser: jest.fn().mockResolvedValue(user)
-    };
+    const response = (await broker.call("auth.signUp", {
+      ...user,
+      confirmPassword: user.password
+    })) as ServiceResponse;
 
-    mockedGetCustomRepository.mockReturnValueOnce(userRepo);
+    console.log(response);
 
-    const res: any = await broker.call("auth.signUp", {
-      username: "asdsdf",
-      email: "asdadasd@mail.com",
-      password: "asdasds",
-      confirmPassword: "asdasds"
-    });
-
-    console.log("res:", res);
+    expect(response).toBeDefined();
+    expect(response.http_status_code).toEqual(201);
+    expect(response.success).toEqual(true);
+    expect(response.data).toBeDefined();
+    expect(response.data!.user).toEqual(user);
   });
 });
