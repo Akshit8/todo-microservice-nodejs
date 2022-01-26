@@ -9,7 +9,7 @@ on:
 
 jobs:
   push_to_ecr:
-    name: psuh to ecr
+    name: push to ecr
     runs-on: ubuntu-latest
     env:
       PROJECT: api-gateway
