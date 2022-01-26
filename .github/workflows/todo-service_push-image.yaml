@@ -1,18 +1,18 @@
-name: Push api-gw image to ecr
+name: Push todo-service image to ecr
 
 on:
   push:
     branches:
       - master
     paths:
-      - "api-gateway/**"
+      - "todo-service/**"
 
 jobs:
   push_to_ecr:
     name: psuh to ecr
     runs-on: ubuntu-latest
     env:
-      PROJECT: api-gateway
+      PROJECT: todo-service
     steps:
       - name: checkout
         uses: actions/checkout@v2
