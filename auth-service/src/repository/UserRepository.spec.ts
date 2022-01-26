@@ -12,7 +12,7 @@ describe("Test UserRepository", () => {
   beforeAll(async () => {
     connection = await createConnection(ormconfig);
 
-    userRepo = connection.getCustomRepository(UserRepository);
+    userRepo = new UserRepository();
 
     testUser = await userRepo.saveNewUser("test", "test@mail.com", "testpswd");
   });

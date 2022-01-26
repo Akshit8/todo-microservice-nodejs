@@ -1,12 +1,18 @@
-import { EntityRepository, QueryFailedError, Repository, TypeORMError } from "typeorm";
+import { getRepository, QueryFailedError, Repository, TypeORMError } from "typeorm";
 import { User } from "../entity";
 import { BadRequestError, ORMError, ResourceNotFoundError } from "../errors";
 import { BcryptHasher, PasswordHasher } from "../utils";
 
-@EntityRepository(User)
 export class UserRepository extends Repository<User> {
   // any hasher that implements `PasswordHasher` can be injected here;
-  private passwordHasher: PasswordHasher = new BcryptHasher();
+  private passwordHasher: PasswordHasher;
+  private repo: Repository<User>;
+
+  constructor() {
+    super();
+    this.passwordHasher = new BcryptHasher();
+    this.repo = getRepository(User);
+  }
 
   async saveNewUser(username: string, email: string, password: string): Promise<User> {
     const user = new User(username, email);
@@ -14,7 +20,7 @@ export class UserRepository extends Repository<User> {
 
     let insertResult;
     try {
-      insertResult = await this.insert(user);
+      insertResult = await this.repo.insert(user);
     } catch (e) {
       // wrap custom error
       if (e instanceof QueryFailedError) {
@@ -36,7 +42,7 @@ export class UserRepository extends Repository<User> {
   private async getUser(query: { [key: string]: string | number }): Promise<User> {
     let user: User | undefined;
     try {
-      user = await this.findOne(query);
+      user = await this.repo.findOne(query);
     } catch (err) {
       if (err instanceof TypeORMError) {
         throw new ORMError(err.message);

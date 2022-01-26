@@ -5,7 +5,6 @@ import {
   Service as MoleculerService
 } from "moleculer";
 import { Action, Method, Service } from "moleculer-decorators";
-import { getCustomRepository } from "typeorm";
 import { User } from "./entity";
 import {
   BadRequestError,
@@ -64,7 +63,7 @@ class AuthService extends MoleculerService {
     this.dbConnectionManager = new DBConnectionManager(this.logger);
     await this.dbConnectionManager.connect();
 
-    this.userRepo = getCustomRepository(UserRepository);
+    this.userRepo = new UserRepository();
     this.authToken = new JWT("secret", "24h");
   }
 
