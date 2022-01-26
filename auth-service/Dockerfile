@@ -15,6 +15,6 @@ ENV NODE_ENV=production
 COPY --from=builder /app/package.json ./
 COPY --from=builder /app/package-lock.json ./
 RUN npm ci --production
-COPY --from=builder /app/dist ./dist
+COPY --from=builder /app/dist ./
 EXPOSE 3000
 CMD ["npm", "start"]

@@ -1,18 +1,18 @@
-name: Push image workflow
+name: Push todo-service image to ecr
 
 on:
-  workflow_call:
-    inputs:
-      project_name:
-        required: true
-        type: string
+  push:
+    branches:
+      - master
+    paths:
+      - "todo-service/**"
 
 jobs:
-  push_image_to_registry:
-    name: push image to registry
+  push_to_ecr:
+    name: psuh to ecr
     runs-on: ubuntu-latest
     env:
-      PROJECT: ${{ inputs.project_name }}
+      PROJECT: todo-service
     steps:
       - name: checkout
         uses: actions/checkout@v2
