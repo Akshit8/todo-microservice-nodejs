@@ -5,6 +5,7 @@ import path from "path";
 import { ServiceResponse } from "./Auth.Service";
 import { User } from "./entity";
 import {
+  AuthenticationError,
   BadRequestError,
   BaseInternalError,
   ServiceErrorCode,
@@ -61,6 +62,18 @@ describe("TEST auth-service", () => {
 
   afterAll(async () => {
     await broker.stop();
+  });
+
+  test("service action not found", async () => {
+    let err: Errors.MoleculerError | undefined;
+    try {
+      await broker.call("auth.random");
+    } catch (e) {
+      err = e as Errors.MoleculerError;
+    }
+
+    expect(err).toBeDefined();
+    expect(err).toBeInstanceOf(Errors.ServiceNotFoundError);
   });
 
   test("Action signUp - ok", async () => {
@@ -130,6 +143,8 @@ describe("TEST auth-service", () => {
   test("Action signUp - repository error", async () => {
     const user = getFakeUser();
     mocked(UserRepository.prototype.saveNewUser).mockRejectedValueOnce(
+      // since we are wrapping every possible error thrown by repository
+      // in a inherited class of BaseInternalError, we can use this to test
       new BaseInternalError("repository error", "repository error")
     );
 
@@ -142,7 +157,7 @@ describe("TEST auth-service", () => {
     } catch (e) {
       err = e as Error;
     }
-    console.log(err);
+
     expect(err).toBeDefined();
     expect(err!.message).toEqual("repository error");
   });
@@ -189,7 +204,7 @@ describe("TEST auth-service", () => {
     expect(response.error!.error_type).toEqual(ServiceErrorTypes.VALIDATION_ERROR);
   });
 
-  test("Action login - user not found", async () => {
+  test("Action login - invalid login", async () => {
     mocked(UserRepository.prototype.loginUser).mockResolvedValueOnce(undefined);
 
     const response = (await broker.call("auth.login", {
@@ -205,15 +220,97 @@ describe("TEST auth-service", () => {
     expect(response.error!.error_type).toEqual(ServiceErrorTypes.BAD_REQUEST_ERROR);
   });
 
-  test("Action login - incorrect password", async () => {});
+  test("Action login - repository error", async () => {
+    mocked(UserRepository.prototype.loginUser).mockRejectedValueOnce(
+      new BaseInternalError("repository error", "repository error")
+    );
 
-  test("Action login - repository error", async () => {});
+    let err: Error | undefined;
+    try {
+      await broker.call("auth.login", {
+        username: "username",
+        password: "password123"
+      });
+    } catch (e) {
+      err = e as Error;
+    }
 
-  test("Action login - token signing error", async () => {});
+    expect(err).toBeDefined();
+    expect(err!.message).toEqual("repository error");
+  });
 
-  test("Action getUser - ok", async () => {});
+  test("Action login - token signing error", async () => {
+    const user = getFakeUser();
 
-  test("Action getUser - invalid token", async () => {});
+    mocked(UserRepository.prototype.loginUser).mockResolvedValueOnce(user);
+    mocked(JWT.prototype.signToken).mockRejectedValueOnce(
+      new BaseInternalError("token signing error", "token signing error")
+    );
 
-  test("Action getUser - repository error", async () => {});
+    let err: Error | undefined;
+    try {
+      await broker.call("auth.login", {
+        username: user.username,
+        password: user.password
+      });
+    } catch (e) {
+      err = e as Error;
+    }
+
+    expect(err).toBeDefined();
+    expect(err!.message).toEqual("token signing error");
+  });
+
+  test("Action getUser - ok", async () => {
+    const user = getFakeUser();
+
+    mocked(JWT.prototype.verifyToken).mockResolvedValueOnce({ id: user.id });
+    mocked(UserRepository.prototype.getUserById).mockResolvedValueOnce(user);
+
+    const response = (await broker.call("auth.getUser", {
+      token: "sample_token"
+    })) as ServiceResponse;
+
+    expect(response).toBeDefined();
+    expect(response.http_status_code).toEqual(200);
+    expect(response.success).toEqual(true);
+    expect(response.data).toBeDefined();
+    expect(response.data!.user).toEqual(user);
+  });
+
+  test("Action getUser - invalid token", async () => {
+    mocked(JWT.prototype.verifyToken).mockRejectedValueOnce(
+      new AuthenticationError("invalid token")
+    );
+
+    const response = (await broker.call("auth.getUser", {
+      token: "sample_token"
+    })) as ServiceResponse;
+
+    expect(response).toBeDefined();
+    expect(response.http_status_code).toEqual(401);
+    expect(response.success).toEqual(false);
+    expect(response.error).toBeDefined();
+    expect(response.error!.error_code).toEqual(ServiceErrorCode.AUTHENTICATION_ERROR);
+    expect(response.error!.error_type).toEqual(ServiceErrorTypes.AUTHENTICATION_ERROR);
+  });
+
+  test("Action getUser - repository error", async () => {
+    mocked(JWT.prototype.verifyToken).mockResolvedValueOnce({ id: 1 });
+    mocked(UserRepository.prototype.getUserById).mockRejectedValueOnce(
+      new BaseInternalError("repository error", "repository error")
+    );
+
+    let err: Error | undefined;
+    try {
+      await broker.call("auth.getUser", {
+        token: "sample_token"
+      });
+    } catch (e) {
+      err = e as Error;
+    }
+
+    expect(err).toBeDefined();
+    expect(err!.message).toEqual("repository error");
+  });
 });
