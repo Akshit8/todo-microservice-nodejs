@@ -4,8 +4,15 @@ import { BrokerOptions, Errors, ServiceBroker } from "moleculer";
 import path from "path";
 import { ServiceResponse } from "./Auth.Service";
 import { User } from "./entity";
-import { ValidationError } from "./errors";
+import {
+  BadRequestError,
+  BaseInternalError,
+  ServiceErrorCode,
+  ServiceErrorTypes,
+  ValidationError
+} from "./errors";
 import { UserRepository } from "./repository";
+import { JWT } from "./utils";
 
 // mocks
 jest.mock("./utils");
@@ -56,7 +63,7 @@ describe("TEST auth-service", () => {
     await broker.stop();
   });
 
-  test("signUp - ok", async () => {
+  test("Action signUp - ok", async () => {
     const user = getFakeUser();
     mocked(UserRepository.prototype.saveNewUser).mockResolvedValueOnce(user);
 
@@ -65,12 +72,148 @@ describe("TEST auth-service", () => {
       confirmPassword: user.password
     })) as ServiceResponse;
 
-    console.log(response);
-
     expect(response).toBeDefined();
     expect(response.http_status_code).toEqual(201);
     expect(response.success).toEqual(true);
     expect(response.data).toBeDefined();
     expect(response.data!.user).toEqual(user);
   });
+
+  test("Action signUp - missing parameter", async () => {
+    const response = (await broker.call("auth.signUp", {
+      username: "username" // other params missing
+    })) as ServiceResponse;
+
+    expect(response).toBeDefined();
+    expect(response.http_status_code).toEqual(422);
+    expect(response.success).toEqual(false);
+    expect(response.error).toBeDefined();
+    expect(response.error!.error_code).toEqual(ServiceErrorCode.VALIDATION_ERROR);
+    expect(response.error!.error_type).toEqual(ServiceErrorTypes.VALIDATION_ERROR);
+  });
+
+  test("Action signUp - incorrect confirm password", async () => {
+    const user = getFakeUser();
+
+    const response = (await broker.call("auth.signUp", {
+      ...user,
+      confirmPassword: "wrong"
+    })) as ServiceResponse;
+
+    expect(response).toBeDefined();
+    expect(response.http_status_code).toEqual(422);
+    expect(response.success).toEqual(false);
+    expect(response.error).toBeDefined();
+    expect(response.error!.error_code).toEqual(ServiceErrorCode.VALIDATION_ERROR);
+    expect(response.error!.error_type).toEqual(ServiceErrorTypes.VALIDATION_ERROR);
+  });
+
+  test("Action signUp - user already exists", async () => {
+    const user = getFakeUser();
+    mocked(UserRepository.prototype.saveNewUser).mockRejectedValueOnce(
+      new BadRequestError("user already exists")
+    );
+
+    const response = (await broker.call("auth.signUp", {
+      ...user,
+      confirmPassword: user.password
+    })) as ServiceResponse;
+
+    expect(response).toBeDefined();
+    expect(response.http_status_code).toEqual(400);
+    expect(response.success).toEqual(false);
+    expect(response.error).toBeDefined();
+    expect(response.error!.error_code).toEqual(ServiceErrorCode.BAD_REQUEST_ERROR);
+    expect(response.error!.error_type).toEqual(ServiceErrorTypes.BAD_REQUEST_ERROR);
+  });
+
+  test("Action signUp - repository error", async () => {
+    const user = getFakeUser();
+    mocked(UserRepository.prototype.saveNewUser).mockRejectedValueOnce(
+      new BaseInternalError("repository error", "repository error")
+    );
+
+    let err: Error | undefined;
+    try {
+      await broker.call("auth.signUp", {
+        ...user,
+        confirmPassword: user.password
+      });
+    } catch (e) {
+      err = e as Error;
+    }
+    console.log(err);
+    expect(err).toBeDefined();
+    expect(err!.message).toEqual("repository error");
+  });
+
+  test("Action login - ok", async () => {
+    const user = getFakeUser();
+
+    mocked(UserRepository.prototype.loginUser).mockResolvedValueOnce(user);
+    mocked(JWT.prototype.signToken).mockResolvedValueOnce("sample_token");
+
+    const response = (await broker.call("auth.login", { ...user })) as ServiceResponse;
+
+    expect(response).toBeDefined();
+    expect(response.http_status_code).toEqual(200);
+    expect(response.success).toEqual(true);
+    expect(response.data).toBeDefined();
+    expect(response.data!.token).toEqual("sample_token");
+  });
+
+  test("Action login - missing parameter", async () => {
+    const response = (await broker.call("auth.login", {
+      username: "username" // other params missing
+    })) as ServiceResponse;
+
+    expect(response).toBeDefined();
+    expect(response.http_status_code).toEqual(422);
+    expect(response.success).toEqual(false);
+    expect(response.error).toBeDefined();
+    expect(response.error!.error_code).toEqual(ServiceErrorCode.VALIDATION_ERROR);
+    expect(response.error!.error_type).toEqual(ServiceErrorTypes.VALIDATION_ERROR);
+  });
+
+  test("Action login - short password", async () => {
+    const response = (await broker.call("auth.login", {
+      username: "username",
+      password: "short"
+    })) as ServiceResponse;
+
+    expect(response).toBeDefined();
+    expect(response.http_status_code).toEqual(422);
+    expect(response.success).toEqual(false);
+    expect(response.error).toBeDefined();
+    expect(response.error!.error_code).toEqual(ServiceErrorCode.VALIDATION_ERROR);
+    expect(response.error!.error_type).toEqual(ServiceErrorTypes.VALIDATION_ERROR);
+  });
+
+  test("Action login - user not found", async () => {
+    mocked(UserRepository.prototype.loginUser).mockResolvedValueOnce(undefined);
+
+    const response = (await broker.call("auth.login", {
+      username: "username",
+      password: "password123"
+    })) as ServiceResponse;
+
+    expect(response).toBeDefined();
+    expect(response.http_status_code).toEqual(400);
+    expect(response.success).toEqual(false);
+    expect(response.error).toBeDefined();
+    expect(response.error!.error_code).toEqual(ServiceErrorCode.BAD_REQUEST_ERROR);
+    expect(response.error!.error_type).toEqual(ServiceErrorTypes.BAD_REQUEST_ERROR);
+  });
+
+  test("Action login - incorrect password", async () => {});
+
+  test("Action login - repository error", async () => {});
+
+  test("Action login - token signing error", async () => {});
+
+  test("Action getUser - ok", async () => {});
+
+  test("Action getUser - invalid token", async () => {});
+
+  test("Action getUser - repository error", async () => {});
 });
