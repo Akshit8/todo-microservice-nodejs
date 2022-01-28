@@ -1,18 +1,4 @@
-/*
- * For a detailed explanation regarding each configuration property and type check, visit:
- * https://jestjs.io/docs/configuration
- */
-
 export default {
-  // All imported modules in your tests should be mocked automatically
-  // automock: false,
-
-  // Stop running tests after `n` failures
-  // bail: 0,
-
-  // The directory where Jest should store its cached dependency information
-  // cacheDirectory: "/private/var/folders/gx/xpx_lphs7ng5qsxswm6ms7rm0000gn/T/jest_dx",
-
   // Automatically clear mock calls, instances and results before every test
   clearMocks: true,
 
@@ -30,22 +16,26 @@ export default {
     "./node_modules/",
     "./db/",
     "./src/errors/",
-    "./src/enitity/"
+    "./src/enitity/",
+    "./src/scripts/",
+    "./src/utils/DBConnectionManager.ts"
   ],
 
   // Indicates which provider should be used to instrument code for coverage
   coverageProvider: "v8",
 
   // A list of reporter names that Jest uses when writing coverage reports
-  // coverageReporters: [
-  //   "json",
-  //   "text",
-  //   "lcov",
-  //   "clover"
-  // ],
+  coverageReporters: ["text"],
 
   // An object that configures minimum threshold enforcement for coverage results
-  // coverageThreshold: undefined,
+  coverageThreshold: {
+    global: {
+      branches: 85,
+      functions: 85,
+      lines: 85,
+      statements: 85
+    }
+  },
 
   // A path to a custom dependency extractor
   // dependencyExtractor: undefined,
@@ -117,7 +107,7 @@ export default {
   // restoreMocks: false,
 
   // The root directory that Jest should scan for tests and modules within
-  // rootDir: undefined,
+  rootDir: undefined,
 
   // A list of paths to directories that Jest should use to search for files in
   // roots: [

@@ -3,13 +3,15 @@ import { User } from "../entity";
 import { BadRequestError, ORMError, ResourceNotFoundError } from "../errors";
 import { BcryptHasher, PasswordHasher } from "../utils";
 
-export class UserRepository extends Repository<User> {
+// Using composition instead of inheritance
+// gives abstraction to decouple the code while testing other layers
+// without mocking the typeorm
+export class UserRepository {
   // any hasher that implements `PasswordHasher` can be injected here;
   private passwordHasher: PasswordHasher;
   private repo: Repository<User>;
 
   constructor() {
-    super();
     this.passwordHasher = new BcryptHasher();
     this.repo = getRepository(User);
   }
@@ -23,6 +25,7 @@ export class UserRepository extends Repository<User> {
       insertResult = await this.repo.insert(user);
     } catch (e) {
       // wrap custom error
+      // TODO: check if EntityNotFoundError is thrown
       if (e instanceof QueryFailedError) {
         throw new BadRequestError("username or email already registered");
       } else if (e instanceof Error) {

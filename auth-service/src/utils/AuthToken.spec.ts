@@ -1,7 +1,7 @@
 import { JWT } from "./AuthToken";
 
 describe("TEST JWT implementation", () => {
-  const authToken = new JWT("asd", "24h");
+  const authToken = new JWT("secret", "24h");
 
   let testToken: string;
   beforeAll(async () => {
