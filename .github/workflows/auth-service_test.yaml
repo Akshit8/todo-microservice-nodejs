@@ -18,6 +18,8 @@ jobs:
         env:
           POSTGRES_USER: admin
           POSTGRES_PASSWORD: admin
+        ports:
+          - 5432:5432
         options: >-
           --health-cmd pg_isready
           --health-interval 10s
@@ -41,3 +43,12 @@ jobs:
 
       - name: test application
         run: npm run test --prefix ./auth-service
+
+      - name: publish coverage
+        uses: codecov/codecov-action@v2
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }} # requried for private repos only
+          files: ./auth-service/coverage/*.json
+          flags: auth-service
+          name: auth-service
+          fail_ci_if_error: true
