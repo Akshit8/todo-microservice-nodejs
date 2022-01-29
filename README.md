@@ -1,8 +1,3 @@
 # todo-microservice-nodejs
 
-## TODO
-
-- clean Auth.service.test
-- write tests for all auth.utils
-- complete todo-service
-- complete gateway
+[![codecov](https://codecov.io/gh/Akshit8/todo-microservice-nodejs/branch/master/graph/badge.svg?token=EH3EHGOEPT)](https://codecov.io/gh/Akshit8/todo-microservice-nodejs)

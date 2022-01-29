@@ -18,6 +18,7 @@ jobs:
         env:
           POSTGRES_USER: admin
           POSTGRES_PASSWORD: admin
+          POSTGRES_DB: todo-service
         ports:
           - 5432:5432
         options: >-
@@ -43,3 +44,12 @@ jobs:
 
       - name: test application
         run: npm run test --prefix ./todo-service
+
+      - name: publish coverage
+        uses: codecov/codecov-action@v2
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }} # requried for private repos only
+          files: ./todo-service/coverage/coverage-final.json
+          flags: todo-service
+          name: todo-service
+          fail_ci_if_error: tru
