@@ -31,6 +31,11 @@ describe("Test UserRepository", () => {
 
   beforeAll(async () => {
     connection = await createConnection(ormconfig);
+
+    if (await connection.showMigrations()) {
+      await connection.runMigrations();
+    }
+
     userRepo = new UserRepository();
     userFactory = new UserFactory("testpswd");
 
