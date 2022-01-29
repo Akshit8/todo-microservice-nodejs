@@ -49,7 +49,7 @@ jobs:
         uses: codecov/codecov-action@v2
         with:
           token: ${{ secrets.CODECOV_TOKEN }} # requried for private repos only
-          files: ./auth-service/coverage/*.json
+          files: ./auth-service/coverage/coverage-final.json
           flags: auth-service
           name: auth-service
           fail_ci_if_error: true
