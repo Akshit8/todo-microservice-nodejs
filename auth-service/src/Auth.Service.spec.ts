@@ -110,7 +110,7 @@ describe("TEST auth-service", () => {
 
     const response = (await broker.call("auth.signUp", {
       ...user,
-      confirmPassword: "wrong"
+      confirmPassword: "randompswd"
     })) as ServiceResponse;
 
     expect(response).toBeDefined();
