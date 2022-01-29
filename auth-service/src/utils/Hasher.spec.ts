@@ -7,17 +7,17 @@ describe("TEST BcryptHasher implementation", () => {
   beforeAll(async () => {
     passwordHasher = new BcryptHasher();
 
-    testHash = await passwordHasher.hashPassword("asd");
+    testHash = await passwordHasher.hashPassword("testpswd");
   });
 
-  test("hashPassword", async () => {
+  test("hashPassword - ok", async () => {
     const hashedPassword = await passwordHasher.hashPassword("pswd");
 
     expect(hashedPassword).toBeDefined();
   });
 
-  test("checkPassword", async () => {
-    const check = await passwordHasher.checkPassword("asd", testHash);
+  test("checkPassword - ok", async () => {
+    const check = await passwordHasher.checkPassword("testpswd", testHash);
 
     expect(check).toBeDefined();
     expect(check).toEqual(true);

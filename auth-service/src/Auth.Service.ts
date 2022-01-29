@@ -5,7 +5,6 @@ import {
   Service as MoleculerService
 } from "moleculer";
 import { Action, Method, Service } from "moleculer-decorators";
-import { getCustomRepository } from "typeorm";
 import { User } from "./entity";
 import {
   BadRequestError,
@@ -16,15 +15,15 @@ import {
 import { UserRepository } from "./repository";
 import { AuthToken, DBConnectionManager, JWT } from "./utils";
 
-interface ServiceError {
+export interface ServiceError {
   error_code: string;
   error_type: string;
   error_message: string;
 }
 
-type ServiceData = string | number | Object;
+type ServiceData = { [key: string]: number | string | User };
 
-interface ServiceResponse {
+export interface ServiceResponse {
   success: boolean;
   http_status_code: number;
   error?: ServiceError;
@@ -64,7 +63,7 @@ class AuthService extends MoleculerService {
     this.dbConnectionManager = new DBConnectionManager(this.logger);
     await this.dbConnectionManager.connect();
 
-    this.userRepo = getCustomRepository(UserRepository);
+    this.userRepo = new UserRepository();
     this.authToken = new JWT("secret", "24h");
   }
 
@@ -91,13 +90,13 @@ class AuthService extends MoleculerService {
 
   @Method
   renderServiceResponse(ctx: Context, res: ActionResponse): ServiceResponse {
+    const data = { ...res } as ServiceData;
+    // @ts-ignore
+    delete data.http_status_code;
     return {
       success: true,
       http_status_code: res.http_status_code,
-      data: {
-        user: res.user,
-        token: res.token
-      }
+      data
     };
   }
 

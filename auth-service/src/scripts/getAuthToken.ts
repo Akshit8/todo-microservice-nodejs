@@ -1,3 +1,4 @@
+// script to generate auth token for any user
 import { JWT } from "../utils";
 
 (async () => {
