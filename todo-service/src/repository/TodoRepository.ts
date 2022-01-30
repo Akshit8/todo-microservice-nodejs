@@ -1,14 +1,19 @@
-import { EntityRepository, Repository, TypeORMError } from "typeorm";
+import { getRepository, Repository, TypeORMError } from "typeorm";
 import { Todo } from "../entity";
 import { ORMError, ResourceNotFoundError } from "../errors";
 
-@EntityRepository(Todo)
-export class TodoRepository extends Repository<Todo> {
+export class TodoRepository {
+  private repo: Repository<Todo>;
+
+  constructor() {
+    this.repo = getRepository(Todo);
+  }
+
   async addNewTodo(actionItem: string, owner: number): Promise<Todo> {
     let todo = new Todo(actionItem, owner);
 
     try {
-      todo = await this.save(todo);
+      todo = await this.repo.save(todo);
     } catch (err) {
       if (err instanceof TypeORMError) {
         throw new ORMError(err.message);
@@ -22,7 +27,7 @@ export class TodoRepository extends Repository<Todo> {
   async getTodoById(id: number, owner: number): Promise<Todo> {
     let todo: Todo | undefined;
     try {
-      todo = await this.findOne({ id, owner });
+      todo = await this.repo.findOne({ id, owner });
     } catch (err) {
       if (err instanceof TypeORMError) {
         throw new ORMError(err.message);
@@ -40,7 +45,7 @@ export class TodoRepository extends Repository<Todo> {
   async getAllTodos(owner: number): Promise<Todo[]> {
     let todos: Todo[];
     try {
-      todos = await this.find({ owner });
+      todos = await this.repo.find({ owner });
     } catch (err) {
       if (err instanceof TypeORMError) {
         throw new ORMError(err.message);
@@ -54,15 +59,15 @@ export class TodoRepository extends Repository<Todo> {
   async updateTodo(
     id: number,
     owner: number,
-    updates: { actionItem?: string; complete?: boolean }
+    updates: { actionItem?: string; completed?: boolean }
   ): Promise<Todo> {
     let todo = await this.getTodoById(id, owner);
 
     todo.action_item = updates.actionItem || todo.action_item;
-    todo.completed = updates.complete || todo.completed;
+    todo.completed = updates.completed || todo.completed;
 
     try {
-      todo = await this.save(todo);
+      todo = await this.repo.save(todo);
     } catch (err) {
       if (err instanceof TypeORMError) {
         throw new ORMError(err.message);
@@ -75,7 +80,7 @@ export class TodoRepository extends Repository<Todo> {
 
   async deleteTodo(id: number, owner: number): Promise<void> {
     try {
-      await this.delete({ id, owner });
+      await this.repo.delete({ id, owner });
     } catch (err) {
       if (err instanceof TypeORMError) {
         throw new ORMError(err.message);

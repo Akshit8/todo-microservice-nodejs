@@ -20,6 +20,7 @@
   "author": "Akshit Sadana",
   "license": "ISC",
   "devDependencies": {
+    "@faker-js/faker": "^6.0.0-alpha.5",
     "@types/jest": "^27.4.0",
     "@types/jsonwebtoken": "^8.5.7",
     "@types/node": "^17.0.8",

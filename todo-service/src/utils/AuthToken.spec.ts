@@ -2,7 +2,7 @@ import { sign } from "jsonwebtoken";
 import { JWT } from "./AuthToken";
 
 describe("TEST JWT implementation", () => {
-  const authToken = new JWT("secret", "24h");
+  const authToken = new JWT("secret");
 
   let testToken: string;
   beforeAll(async () => {
