@@ -11,11 +11,9 @@ export interface AuthToken {
 
 export class JWT implements AuthToken {
   private secret: string;
-  private duration: string;
 
-  constructor(secret: string, duration?: string) {
+  constructor(secret: string) {
     this.secret = secret;
-    this.duration = duration || "24h";
   }
 
   async verifyToken(token: string): Promise<tokenPayload> {
