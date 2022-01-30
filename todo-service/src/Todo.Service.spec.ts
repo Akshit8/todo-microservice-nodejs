@@ -3,13 +3,7 @@ import { mocked } from "jest-mock";
 import { BrokerOptions, Errors, ServiceBroker } from "moleculer";
 import path from "path";
 import { Todo } from "./entity";
-import {
-  AuthenticationError,
-  AuthTokenError,
-  ServiceErrorCode,
-  ServiceErrorTypes,
-  ValidationError
-} from "./errors";
+import { ServiceErrorCode, ServiceErrorTypes, ValidationError } from "./errors";
 import { TodoRepository } from "./repository";
 import { ServiceResponse } from "./Todo.Service";
 import { JWT } from "./utils";
@@ -75,45 +69,6 @@ describe("TEST todo-service", () => {
 
     expect(err).toBeDefined();
     expect(err).toBeInstanceOf(Errors.ServiceNotFoundError);
-  });
-
-  test("all actions access with invalid auth token", async () => {
-    for (const action in broker.getLocalService("todo").actions) {
-      mocked(JWT.prototype.verifyToken).mockRejectedValueOnce(
-        new AuthenticationError("auth token error")
-      );
-      const response = (await broker.call(`todo.${action}`, {
-        token: "randomtoken",
-        actionItem: "random action item"
-      })) as ServiceResponse;
-
-      expect(response).toBeDefined();
-      expect(response.http_status_code).toEqual(401);
-      expect(response.error).toBeDefined();
-      expect(response.error!.error_code).toEqual(ServiceErrorCode.AUTHENTICATION_ERROR);
-      expect(response.error!.error_type).toEqual(
-        ServiceErrorTypes.AUTHENTICATION_ERROR
-      );
-    }
-  });
-
-  test("all actions access with internal error for token verification", async () => {
-    for (const action in broker.getLocalService("todo").actions) {
-      mocked(JWT.prototype.verifyToken).mockRejectedValueOnce(
-        new AuthTokenError("auth token error")
-      );
-
-      let err: Errors.MoleculerError | undefined;
-      try {
-        await broker.call(`todo.${action}`, { actionItem: "random action item" });
-      } catch (e) {
-        err = e as Errors.MoleculerError;
-      }
-
-      expect(err).toBeDefined();
-      expect(err).toBeInstanceOf(Errors.MoleculerServerError);
-      expect(err?.message).toEqual("auth token error");
-    }
   });
 
   test("Action createTodo - ok", async () => {
