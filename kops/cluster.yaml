@@ -1,0 +1,57 @@
+apiVersion: kops.k8s.io/v1alpha2
+kind: Cluster
+metadata:
+  creationTimestamp: "2022-02-02T19:08:19Z"
+  name: todo-app.k8s.local
+spec:
+  api:
+    loadBalancer:
+      class: Classic
+      type: Public
+  authorization:
+    rbac: {}
+  channel: stable
+  cloudProvider: aws
+  configBase: s3://todo-k8s-cluster-state/todo-app.k8s.local
+  etcdClusters:
+    - cpuRequest: 200m
+      etcdMembers:
+        - encryptedVolume: true
+          instanceGroup: master-ap-south-1a
+          name: a
+      memoryRequest: 100Mi
+      name: main
+    - cpuRequest: 100m
+      etcdMembers:
+        - encryptedVolume: true
+          instanceGroup: master-ap-south-1a
+          name: a
+      memoryRequest: 100Mi
+      name: events
+  iam:
+    allowContainerRegistry: true
+    legacy: false
+  kubelet:
+    anonymousAuth: false
+  kubernetesApiAccess:
+    - 0.0.0.0/0
+    - ::/0
+  kubernetesVersion: 1.22.5
+  masterPublicName: api.todo-app.k8s.local
+  networkCIDR: 172.20.0.0/16
+  networking:
+    kubenet: {}
+  nonMasqueradeCIDR: 100.64.0.0/10
+  sshAccess:
+    - 0.0.0.0/0
+    - ::/0
+  subnets:
+    - cidr: 172.20.32.0/19
+      name: ap-south-1a
+      type: Public
+      zone: ap-south-1a
+  topology:
+    dns:
+      type: Public
+    masters: public
+    nodes: public
