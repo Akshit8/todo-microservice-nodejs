@@ -7,8 +7,26 @@ export default {
   transporter: {
     type: "NATS",
     options: {
-      url: "nats://localhost:4222"
+      url: process.env.TRANSPORTER_URL || "nats://localhost:4222"
     }
+  },
+  metrics: {
+    enabled: true,
+    reporter: [
+      {
+        type: "Prometheus",
+        options: {
+          port: 3030,
+          path: "/metrics",
+          defaultLabels: (registry: any) => {
+            return {
+              namespace: registry.broker.namespace,
+              nodeID: registry.broker.nodeID
+            };
+          }
+        }
+      }
+    ]
   },
   validator: true,
   logger: {

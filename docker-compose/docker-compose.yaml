@@ -10,7 +10,14 @@ services:
       POSTGRES_USER: admin
       POSTGRES_PASSWORD: admin
     volumes:
-      - postgres-data:/var/lib/postgresql/data
+      - postgres-data-dev:/var/lib/postgresql/data
+
+  prometheus:
+    image: prom/prometheus
+    ports:
+      - 9090:9090
+    volumes:
+      - ../prometheus/dev/prometheus.yml:/etc/prometheus/prometheus.yml
 
   postgres-ui:
     image: dpage/pgadmin4
@@ -22,8 +29,11 @@ services:
 
   api-gw:
     build:
-      context: ./api-gw
+      context: ./api-gateway
       dockerfile: Dockerfile
+    environment:
+      NODE_ENV: production
+      TRANSPORTER_URL: nats://nats:4222
     ports:
       - 3000:3000
     depends_on:
@@ -34,6 +44,10 @@ services:
     build:
       context: ./auth-service
       dockerfile: Dockerfile
+    environment:
+      NODE_ENV: production
+      TRANSPORTER_URL: nats://nats:4222
+      DB_HOST: postgres
     depends_on:
       - postgres
       - nats
@@ -42,13 +56,17 @@ services:
     build:
       context: ./todo-service
       dockerfile: Dockerfile
+    environment:
+      NODE_ENV: production
+      TRANSPORTER_URL: nats://nats:4222
+      DB_HOST: postgres
     depends_on:
       - postgres
       - nats
 
 networks:
   default:
-    name: todo-network
+    name: todo-network-dev
 
 volumes:
-  postgres-data:
+  postgres-data-dev:
