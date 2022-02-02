@@ -1,0 +1,54 @@
+version: "3.9"
+
+services:
+  nats:
+    image: nats
+
+  postgres:
+    image: postgres:alpine
+    environment:
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: admin
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+
+  postgres-ui:
+    image: dpage/pgadmin4
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@admin.com
+      PGADMIN_DEFAULT_PASSWORD: root
+    ports:
+      - 5050:80
+
+  api-gw:
+    build:
+      context: ./api-gw
+      dockerfile: Dockerfile
+    ports:
+      - 3000:3000
+    depends_on:
+      - postgres
+      - nats
+
+  auth-service:
+    build:
+      context: ./auth-service
+      dockerfile: Dockerfile
+    depends_on:
+      - postgres
+      - nats
+
+  todo-service:
+    build:
+      context: ./todo-service
+      dockerfile: Dockerfile
+    depends_on:
+      - postgres
+      - nats
+
+networks:
+  default:
+    name: todo-network
+
+volumes:
+  postgres-data:
