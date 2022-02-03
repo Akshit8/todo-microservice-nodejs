@@ -4,7 +4,7 @@
   "description": "authentication microservice deals with user auth and details",
   "main": "src/main.ts",
   "scripts": {
-    "build": "tsc -p tsconfig.json",
+    "build": "tsc -p tsconfig.build.json",
     "dev": "nodemon",
     "start": "node node_modules/moleculer/bin/moleculer-runner --config moleculer.config.js src/*.Service.js",
     "repl": "ts-node node_modules/moleculer/bin/moleculer-runner --hot --repl --config moleculer.config.ts src/*.Service.ts",
@@ -20,7 +20,6 @@
   "author": "Akshit Sadana",
   "license": "ISC",
   "devDependencies": {
-    "@faker-js/faker": "^6.0.0-alpha.3",
     "@types/bcryptjs": "^2.4.2",
     "@types/faker": "^5.5.9",
     "@types/jest": "^27.4.0",
@@ -34,6 +33,7 @@
     "typescript": "^4.5.4"
   },
   "dependencies": {
+    "@faker-js/faker": "^6.0.0-alpha.5",
     "bcryptjs": "^2.4.3",
     "jsonwebtoken": "^8.5.1",
     "moleculer": "^0.14.19",
