@@ -155,8 +155,8 @@ class TodoService extends MoleculerService {
   @Action({
     params: {
       id: { type: "number" },
-      actionItem: { type: "string", nullable: true },
-      completed: { type: "boolean", nullable: true }
+      actionItem: { type: "string", optional: true },
+      completed: { type: "boolean", optional: true }
     }
   })
   async updateTodo({
