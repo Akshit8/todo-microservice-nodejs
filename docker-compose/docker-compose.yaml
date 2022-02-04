@@ -34,6 +34,7 @@ services:
     environment:
       NODE_ENV: production
       TRANSPORTER_URL: nats://nats:4222
+      ENABLE_METRICS: true
     ports:
       - 3000:3000
     depends_on:
@@ -48,6 +49,7 @@ services:
       NODE_ENV: production
       TRANSPORTER_URL: nats://nats:4222
       DB_HOST: postgres
+      ENABLE_METRICS: true
     depends_on:
       - postgres
       - nats
@@ -60,6 +62,7 @@ services:
       NODE_ENV: production
       TRANSPORTER_URL: nats://nats:4222
       DB_HOST: postgres
+      ENABLE_METRICS: true
     depends_on:
       - postgres
       - nats

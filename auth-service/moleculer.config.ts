@@ -11,12 +11,12 @@ export default {
     }
   },
   metrics: {
-    enabled: true,
+    enabled: process.env.ENABLE_METRICS === "true",
     reporter: [
       {
         type: "Prometheus",
         options: {
-          port: 3030,
+          port: 3031,
           path: "/metrics",
           defaultLabels: (registry: any) => {
             return {
