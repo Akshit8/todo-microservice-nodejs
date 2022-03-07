@@ -3,7 +3,7 @@ import Pqueue from "p-queue";
 
 const MAX_HTTP_CLIENT_RETRIES = 3;
 const HTTP_CLIENT_SLEEP_TIME = 1000;
-const HTTP_CLEINT_ERROR_CODE = 822;
+const HTTP_CLIENT_ERROR_CODE = 822;
 
 interface ClientOptions {
   requestTimeout: number;
@@ -11,8 +11,8 @@ interface ClientOptions {
 }
 
 interface ClientLogger {
-  info(message: string): void;
-  error(message: string): void;
+  info(...data: any[]): void;
+  error(...data: any[]): void;
 }
 
 class HTTPClient {
@@ -39,13 +39,14 @@ class HTTPClient {
     const timestamp = new Date();
 
     while (retriesCount > 0) {
-      this.logger.info(`Requesting ${config.url} retries left: ${retriesCount}`);
-
       try {
         const response = await this.axiosInstance.request(config);
 
         this.logger.info(
-          `Request ${config.url} succeeded with status code ${response.status}`
+          `Request to ${config.url} succeeded 
+          response status: ${response.status}
+          response body`,
+          response.data
         );
 
         return {
@@ -63,6 +64,10 @@ class HTTPClient {
 
         retriesCount--;
 
+        this.logger.info(
+          `Request to ${config.url} failed, retrying ${retriesCount} more times`
+        );
+
         await sleep(HTTP_CLIENT_SLEEP_TIME);
       }
     }
@@ -74,27 +79,32 @@ class HTTPClient {
 
       if (err.response) {
         this.logger.error(
-          `Response error: 
-          ${err.response.status} 
-          ${err.response.statusText}
-          ${err.response.data}`
+          `
+          Destination server returned error: 
+          response status: ${err.response.status} 
+          response body:`,
+          err.response.data
         );
       } else {
-        this.logger.error(`Request error: ${err.message}`);
+        this.logger.error(`Error: ${err.message}`);
       }
     }
 
     return {
       timestamp,
-      statusCode: err?.response?.status || HTTP_CLEINT_ERROR_CODE
+      statusCode: err?.response?.status || HTTP_CLIENT_ERROR_CODE
     };
   }
 
-  async get(url: string, requestConfig?: AxiosRequestConfig) {
+  async get(url: string, requestConfig?: AxiosRequestConfig): Promise<any> {
     return this.queue.add(() => this.request({ url, ...requestConfig, method: "GET" }));
   }
 
-  async post(url: string, data?: any, requestConfig?: AxiosRequestConfig) {
+  async post(
+    url: string,
+    data?: any,
+    requestConfig?: AxiosRequestConfig
+  ): Promise<any> {
     return this.queue.add(() =>
       this.request({ url, data, ...requestConfig, method: "POST" })
     );
@@ -102,5 +112,13 @@ class HTTPClient {
 }
 
 const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
+
+(async () => {
+  const client = new HTTPClient();
+
+  const res = await client.get("https://jsonplaceholder.typicode.com/todos/1");
+
+  console.log(res);
+})();
 
 export default HTTPClient;

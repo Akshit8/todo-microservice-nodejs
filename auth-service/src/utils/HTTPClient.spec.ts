@@ -2,6 +2,7 @@ import { AxiosRequestConfig } from "axios";
 import HTTPClient from "./HTTPClient";
 
 interface RequestInterface {
+  name?: string;
   method: string;
   url: string;
   data?: any;
@@ -105,14 +106,17 @@ describe("TEST HTTPClient", () => {
 
     const requests: RequestInterface[] = [
       {
+        name: "incorrect url",
         method: "GET",
         url: "https://jsonplaceholde.typicode.com/todos/1"
       },
       {
+        name: "404 error",
         method: "GET",
         url: "https://jsonplaceholder.typicode.com/todos/2234234"
       },
       {
+        name: "incorrect url",
         method: "POST",
         url: "https://jsonplaceholde.typicode.com/todos",
         data: {
