@@ -15,7 +15,7 @@ interface ClientLogger {
   error(...data: any[]): void;
 }
 
-class HTTPClient {
+export class HTTPClient {
   axiosInstance: AxiosInstance;
 
   private logger: ClientLogger;
@@ -112,13 +112,3 @@ class HTTPClient {
 }
 
 const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
-
-(async () => {
-  const client = new HTTPClient();
-
-  const res = await client.get("https://jsonplaceholder.typicode.com/todos/1");
-
-  console.log(res);
-})();
-
-export default HTTPClient;

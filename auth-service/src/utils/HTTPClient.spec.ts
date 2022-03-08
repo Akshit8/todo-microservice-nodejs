@@ -1,5 +1,5 @@
 import { AxiosRequestConfig } from "axios";
-import HTTPClient from "./HTTPClient";
+import { HTTPClient } from "./HTTPClient";
 
 interface RequestInterface {
   name?: string;
