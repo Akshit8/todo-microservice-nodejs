@@ -38,12 +38,19 @@ export class HTTPClient {
 
     const timestamp = new Date();
 
+    this.logger.info(
+      `Making request to ${config.url} at ${timestamp.toISOString()}
+      with method: ${config.method}
+      with headers: ${JSON.stringify(config.headers) || null}
+      with data: ${JSON.stringify(config.data) || null}`
+    );
+
     while (retriesCount > 0) {
       try {
         const response = await this.axiosInstance.request(config);
 
         this.logger.info(
-          `Request to ${config.url} succeeded 
+          `Request to ${config.url} at ${timestamp.toISOString()} succeeded 
           response status: ${response.status}
           response body`,
           response.data
@@ -75,18 +82,20 @@ export class HTTPClient {
     if (err) {
       const requestConfig = err.config;
 
-      this.logger.error(`Request ${requestConfig.url} failed`);
-
       if (err.response) {
         this.logger.error(
           `
+          Request ${requestConfig.url} at ${timestamp.toISOString()} failed
           Destination server returned error: 
           response status: ${err.response.status} 
           response body:`,
           err.response.data
         );
       } else {
-        this.logger.error(`Error: ${err.message}`);
+        this.logger.error(
+          `Request ${requestConfig.url} at ${timestamp.toISOString()} failed
+          Error: ${err.message}`
+        );
       }
     }
 
