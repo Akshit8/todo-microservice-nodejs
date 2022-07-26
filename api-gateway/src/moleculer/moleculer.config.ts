@@ -12,7 +12,7 @@ export const brokerConfig: BrokerOptions = {
     }
   },
   metrics: {
-    enabled: true,
+    enabled: process.env.ENABLE_METRICS === "true",
     reporter: [
       {
         type: "Prometheus",

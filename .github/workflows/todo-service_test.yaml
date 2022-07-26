@@ -52,4 +52,4 @@ jobs:
           files: ./todo-service/coverage/coverage-final.json
           flags: todo-service
           name: todo-service
-          fail_ci_if_error: tru
+          fail_ci_if_error: true
